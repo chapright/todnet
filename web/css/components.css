@@ -1,0 +1,760 @@
+/* ============================================================
+   Ember — components
+   Every primitive: default / hover / active / focus-visible /
+   disabled / loading. No component styles live outside this file
+   except layout-specific wrappers in views.css.
+   ============================================================ */
+
+/* ---------------- button ---------------- */
+
+.btn {
+  --btn-h: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  height: var(--btn-h);
+  padding-inline: 14px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text);
+  font-size: var(--text-small);
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition:
+    background-color var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out),
+    color var(--dur-2) var(--ease-out),
+    transform var(--dur-1) var(--ease-out),
+    box-shadow var(--dur-2) var(--ease-out);
+}
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { opacity: .45; cursor: default; }
+
+.btn.sm { --btn-h: 32px; padding-inline: 10px; font-size: var(--text-caption); }
+.btn.lg { --btn-h: 44px; padding-inline: 22px; font-size: var(--text-body); border-radius: var(--r-sm); }
+.btn.full { width: 100%; }
+
+.btn.primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .18) inset, 0 6px 18px var(--glow-soft);
+}
+.btn.primary:hover:not(:disabled) { background: var(--accent-hover); }
+.btn.primary:active:not(:disabled) { background: var(--accent-press); }
+
+.btn.secondary {
+  background: var(--surface-2);
+  border-color: var(--border);
+  color: var(--text);
+}
+.btn.secondary:hover:not(:disabled) { background: var(--surface-3); border-color: var(--border-strong); }
+
+.btn.ghost { color: var(--text-2); }
+.btn.ghost:hover:not(:disabled) { background: var(--surface-2); color: var(--text); }
+
+.btn.danger { color: var(--danger); }
+.btn.danger:hover:not(:disabled) { background: var(--danger-soft); }
+/* The pressed state is a border, so it has to be readable as a shape. */
+.btn.is-on {
+  color: var(--accent-text);
+  border-color: var(--accent-strong);
+  background: var(--accent-soft);
+}
+
+.btn.loading { pointer-events: none; }
+.btn .btn-label { display: inline-flex; align-items: center; gap: var(--s-2); }
+.btn .btn-label.is-hidden { visibility: hidden; }
+.btn .spinner { position: absolute; }
+
+.btn.is-fixed { position: relative; }
+.btn.is-fixed .btn-label { transition: opacity var(--dur-2) var(--ease-out); }
+
+/* ---------------- icon button ---------------- */
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), transform var(--dur-1) var(--ease-out);
+}
+.icon-btn:hover:not(:disabled) { background: var(--surface-2); color: var(--text); }
+.icon-btn:active:not(:disabled) { transform: scale(.94); }
+.icon-btn:disabled { opacity: .4; cursor: default; }
+.icon-btn.sm { width: 28px; height: 28px; }
+.icon-btn.lg { width: 36px; height: 36px; }
+
+/* ---------------- switch ---------------- */
+
+.switch {
+  position: relative;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-full);
+  background: var(--surface-3);
+  cursor: pointer;
+  transition: background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out);
+}
+.switch:hover { border-color: var(--text-3); }
+.switch[aria-checked="true"] {
+  background: var(--accent);
+  border-color: transparent;
+}
+.switch-knob {
+  position: absolute;
+  top: 3px;
+  inset-inline-start: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  /* The knob is white on an accent track, which is 2.59:1. Its edge is
+     what identifies it, so the edge is given a solid dark ink: 7.5:1
+     against the track. */
+  border: 1px solid var(--knob-edge);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .25);
+  transition:
+    inset-inline-start var(--dur-3) var(--ease-spring),
+    width var(--dur-1) var(--ease-out),
+    height var(--dur-1) var(--ease-out),
+    top var(--dur-1) var(--ease-out);
+}
+.switch[aria-checked="true"] .switch-knob { inset-inline-start: 23px; }
+.switch:active .switch-knob { width: 19px; height: 18px; top: 2px; }
+.switch:active[aria-checked="true"] .switch-knob { inset-inline-start: 20px; }
+.switch:disabled { opacity: .45; cursor: default; }
+
+/* ---------------- segmented ---------------- */
+
+.seg {
+  position: relative;
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+}
+.seg-thumb {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  border-radius: var(--r-xs);
+  background: var(--surface-1);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .18);
+  transition:
+    inset-inline-start var(--dur-3) var(--ease-spring),
+    width var(--dur-3) var(--ease-spring);
+  pointer-events: none;
+}
+[data-theme="light"] .seg-thumb { background: #fff; }
+.seg button {
+  position: relative;
+  z-index: 1;
+  height: 26px;
+  padding-inline: 12px;
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-2);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--dur-2) var(--ease-out);
+}
+.seg button:hover { color: var(--text); }
+.seg button[aria-pressed="true"] { color: var(--text); }
+.seg button:disabled { opacity: .4; cursor: default; }
+
+/* ---------------- card ---------------- */
+
+.card {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  box-shadow: var(--shadow-1), var(--inner-top);
+  overflow: hidden;
+  isolation: isolate;
+}
+.card.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), var(--accent-soft), transparent 65%);
+  transition: opacity var(--dur-3) var(--ease-out);
+}
+.card.spotlight:hover::before { opacity: 1; }
+.card > * { position: relative; z-index: 1; }
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  margin-bottom: var(--s-3);
+}
+.card-label {
+  font-size: var(--text-caption);
+  line-height: var(--text-caption-lh);
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* ---------------- badges / chips / pills ---------------- */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 26px;
+  line-height: 1;
+  padding-inline: 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-full);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-3); }
+
+/* The tone carries the meaning through the label's colour (8:1 or
+   better in both themes); the border keeps the container itself
+   identifiable. */
+.chip.tone-ok { color: var(--ok); background: var(--ok-soft); }
+.chip.tone-ok .dot { background: var(--ok); box-shadow: 0 0 0 3px var(--ok-soft); }
+.chip.tone-busy { color: var(--warn); background: var(--warn-soft); }
+.chip.tone-busy .dot { background: var(--warn); }
+.chip.tone-error { color: var(--danger); background: var(--danger-soft); }
+.chip.tone-error .dot { background: var(--danger); }
+.chip.tone-idle { color: var(--text-2); }
+
+.chip.tone-busy .dot { animation: dot-pulse 1.6s var(--ease-in-out) infinite; }
+@keyframes dot-pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  line-height: 1;
+  padding-inline: 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-full);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+.pill.mono { font-family: var(--font-mono); font-size: var(--text-micro); letter-spacing: -.01em; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: var(--r-full);
+  background: var(--surface-3);
+  color: var(--text-2);
+  font-size: var(--text-micro);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.badge.warn { background: var(--warn-soft); color: var(--warn); }
+.badge.danger { background: var(--danger-soft); color: var(--danger); }
+
+/* ---------------- flag chip (I-02) ---------------- */
+
+.flag-chip {
+  position: relative;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 20px;
+  border-radius: var(--r-xs);
+  overflow: hidden;
+  background: var(--surface-3);
+  box-shadow: 0 0 0 1px var(--chip-ring), 0 1px 2px var(--chip-cast);
+  display: grid;
+  place-items: center;
+  color: var(--text-2);
+  font-size: var(--text-micro);
+  font-weight: 700;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  user-select: none;
+}
+[data-theme="light"] .flag-chip { box-shadow: 0 0 0 1px var(--chip-ring), 0 1px 2px var(--chip-cast); }
+.flag-chip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.flag-chip.lg { width: 34px; height: 23px; border-radius: var(--r-xs); }
+.flag-chip svg { width: 13px; height: 13px; }
+.flag-chip.auto { background: var(--accent-soft); color: var(--accent-text); }
+
+/* ---------------- input / search ---------------- */
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > label, .field-label {
+  font-size: var(--text-caption);
+  line-height: var(--text-caption-lh);
+  font-weight: 600;
+  color: var(--text-2);
+}
+.input {
+  height: 38px;
+  width: 100%;
+  padding-inline: 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--text-small);
+  outline: none;
+  transition: border-color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out);
+}
+.input::placeholder { color: var(--text-3); }
+.input:hover { border-color: var(--text-3); }
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  background: var(--surface-1);
+}
+.input:disabled { opacity: .5; cursor: default; }
+.input.num { font-family: var(--font-mono); font-size: var(--text-small); }
+
+.input-wrap { position: relative; }
+.input-wrap .input { padding-inline-start: 36px; }
+.input-wrap > svg,
+.input-wrap > span {
+  position: absolute;
+  inset-inline-start: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  color: var(--text-3);
+  pointer-events: none;
+  /* The input is position: relative and comes later in the tree, so without
+     a layer of its own the icon is painted under the field's background. */
+  z-index: 1;
+}
+.input-wrap > svg { width: 16px; height: 16px; }
+
+.field-error {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 8px 10px;
+  border-radius: var(--r-xs);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption-lh);
+}
+
+/* ---------------- tooltip ---------------- */
+
+[data-tip] { position: relative; }
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  z-index: 80;
+  inset-inline-start: 50%;
+  bottom: calc(100% + 8px);
+  transform: translate(-50%, 4px);
+  max-width: 240px;
+  padding: 6px 9px;
+  border-radius: var(--r-xs);
+  background: var(--surface-3);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-2);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption-lh);
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-2) var(--ease-out) 500ms, transform var(--dur-2) var(--ease-out) 500ms;
+}
+[data-tip]:hover::after, [data-tip]:focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+[data-tip-pos="bottom"]::after {
+  top: calc(100% + 8px);
+  bottom: auto;
+}
+
+/* ---------------- skeleton / spinner ---------------- */
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-xs);
+  background: var(--surface-2);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .06), transparent);
+  animation: shimmer 1.4s infinite;
+}
+[data-theme="light"] .skeleton::after { background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .8), transparent); }
+@keyframes shimmer { to { transform: translateX(100%); } }
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-inline-end-color: transparent;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(1turn); } }
+
+/* ---------------- empty state ---------------- */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-10) var(--s-4);
+  text-align: center;
+  color: var(--text-2);
+}
+.empty-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  color: var(--text-3);
+}
+.empty-title { font-size: var(--text-subtitle); line-height: var(--text-subtitle-lh); font-weight: 600; color: var(--text); }
+.empty-text { max-width: 42ch; font-size: var(--text-small); line-height: var(--text-small-lh); }
+
+/* ---------------- copy value ---------------- */
+
+.copy-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+}
+/* The copy button is always visible. It used to appear on hover only,
+   which hid the affordance from anyone reading a screenshot and from
+   anyone using a pointer that cannot hover. */
+.copy-value .copy-btn {
+  color: var(--text-3);
+  transition: color var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out);
+}
+.copy-value:hover .copy-btn { color: var(--text-2); }
+.copy-value .copy-btn:hover { color: var(--text); }
+.copy-value.is-copied .copy-btn { color: var(--ok); }
+
+/* ---------------- signal bars ---------------- */
+
+.signal {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+.signal i {
+  width: 3px;
+  border-radius: var(--r-full);
+  background: var(--border-strong);
+}
+.signal i:nth-child(1) { height: 4px; }
+.signal i:nth-child(2) { height: 7px; }
+.signal i:nth-child(3) { height: 10px; }
+.signal i:nth-child(4) { height: 12px; }
+.signal.s2 i:nth-child(-n+2),
+.signal.s3 i:nth-child(-n+3),
+.signal.s4 i:nth-child(-n+4) { background: var(--ok); }
+.signal.s1 i:nth-child(-n+1) { background: var(--warn); }
+
+/* ---------------- ring ---------------- */
+
+/* The track is a quiet hint of the full circle; the arc carries the value.
+   The old radial tick at 12 read as a stray grey line on top of the arc. */
+.ring .ring-track { stroke: var(--ring-track); }
+.ring .ring-value {
+  stroke-linecap: round;
+  transition: stroke-dashoffset var(--dur-5) var(--ease-out), stroke var(--dur-3) var(--ease-out);
+}
+.ring .ring-stop-a { stop-color: var(--ring-start); }
+.ring .ring-stop-b { stop-color: var(--ring-end); }
+.ring.is-warn .ring-value { stroke: var(--warn); }
+.ring.is-danger .ring-value { stroke: var(--danger); }
+.ring.is-empty { opacity: 0; }
+
+/* ---------------- disclosure ---------------- */
+
+.disclosure {
+  border-top: 1px solid var(--border);
+}
+.disclosure summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 2px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--text-2);
+  font-size: var(--text-small);
+  font-weight: 600;
+}
+.disclosure summary::-webkit-details-marker { display: none; }
+.disclosure summary .chev { transition: transform var(--dur-3) var(--ease-out); }
+.disclosure[open] summary .chev { transform: rotate(90deg); }
+.disclosure-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--dur-4) var(--ease-out);
+}
+.disclosure[open] .disclosure-body { grid-template-rows: 1fr; }
+.disclosure-body > div { overflow: hidden; }
+
+/* ---------------- toast ---------------- */
+
+.toast-host {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 20px;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 260px;
+  max-width: 520px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  box-shadow: var(--shadow-2);
+  font-size: var(--text-small);
+  line-height: var(--text-small-lh);
+  pointer-events: auto;
+  position: relative;
+  overflow: hidden;
+  animation: toast-in var(--dur-3) var(--ease-spring);
+}
+.toast.is-leaving { animation: toast-out var(--dur-2) var(--ease-in-out) forwards; }
+.toast-icon { flex: 0 0 auto; color: var(--ok); display: grid; place-items: center; }
+.toast.error .toast-icon { color: var(--danger); }
+.toast.info .toast-icon { color: var(--accent-text); }
+.toast-text { flex: 1 1 auto; }
+.toast-close { flex: 0 0 auto; }
+.toast-progress {
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: 0;
+  height: 1px;
+  width: 100%;
+  background: var(--accent-line);
+  transform-origin: left;
+  animation: toast-progress 4s linear forwards;
+}
+.toast:hover .toast-progress { animation-play-state: paused; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes toast-out { to { opacity: 0; transform: translateY(6px); } }
+@keyframes toast-progress { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+/* ---------------- banner ---------------- */
+
+.banner-host {
+  /* In the flow, not over it: an overlay banner covered the protection chip and
+     the top of the stage card on the exact screen where that state matters. */
+  position: relative;
+  z-index: 40;
+  display: flex;
+  justify-content: center;
+  padding: 12px var(--s-6) 0;
+}
+.banner-host:empty { display: none; }
+.banner {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  max-width: calc(var(--content-max) - 48px);
+  padding: 12px 14px;
+  border: 1px solid var(--danger-soft);
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--surface-1) 88%, var(--danger));
+  box-shadow: var(--shadow-2);
+  animation: banner-in var(--dur-3) var(--ease-out);
+}
+.banner.warn { background: color-mix(in srgb, var(--surface-1) 88%, var(--warn)); border-color: var(--warn-soft); }
+.banner-icon { flex: 0 0 auto; color: var(--danger); margin-top: 1px; }
+.banner.warn .banner-icon { color: var(--warn); }
+.banner-body { flex: 1 1 auto; min-width: 0; }
+.banner-title { font-size: var(--text-small); font-weight: 600; }
+.banner-text { margin-top: 2px; font-size: var(--text-caption); color: var(--text-2); line-height: var(--text-caption-lh); }
+.banner-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.banner-actions:empty { display: none; }
+.banner.is-leaving { animation: banner-out var(--dur-2) var(--ease-in-out) forwards; }
+@keyframes banner-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+@keyframes banner-out { to { opacity: 0; transform: translateY(-6px); } }
+
+/* ---------------- modal ---------------- */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: var(--s-6);
+  background: rgba(10, 7, 5, .55);
+  backdrop-filter: blur(8px);
+  animation: scrim-in var(--dur-3) var(--ease-out);
+}
+[data-theme="light"] .scrim { background: rgba(60, 35, 20, .30); }
+.scrim.is-leaving { animation: scrim-out var(--dur-2) var(--ease-in-out) forwards; }
+@keyframes scrim-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scrim-out { to { opacity: 0; } }
+
+.modal {
+  position: relative;
+  width: min(440px, 100%);
+  max-height: min(86vh, 760px);
+  overflow-y: auto;
+  padding: var(--s-6);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg);
+  background: var(--surface-1);
+  box-shadow: var(--shadow-3), var(--inner-top);
+  animation: modal-in var(--dur-4) var(--ease-spring);
+}
+.modal.is-leaving { animation: modal-out var(--dur-2) var(--ease-in-out) forwards; }
+.modal.wide { width: min(520px, 100%); }
+@keyframes modal-in { from { opacity: 0; transform: scale(.96) translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes modal-out { to { opacity: 0; transform: scale(.98); } }
+
+.modal-head { display: flex; align-items: flex-start; gap: var(--s-3); margin-bottom: var(--s-2); }
+.modal-icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-sm);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.modal-icon.danger { background: var(--danger-soft); color: var(--danger); }
+.modal-icon.warn { background: var(--warn-soft); color: var(--warn); }
+.modal-icon.ok { background: var(--ok-soft); color: var(--ok); }
+.modal-title { font-size: var(--text-title); line-height: var(--text-title-lh); font-weight: 600; overflow-wrap: anywhere; }
+.modal-sub { margin-top: 4px; font-size: var(--text-small); line-height: var(--text-small-lh); color: var(--text-2); }
+.modal-body { margin-top: var(--s-4); }
+.modal-actions { display: flex; flex-direction: column; gap: 8px; margin-top: var(--s-5); }
+.modal-actions.row { flex-direction: row; justify-content: flex-end; }
+.modal-close { position: absolute; top: 14px; inset-inline-end: 14px; }
+.modal-foot { margin-top: var(--s-4); text-align: center; }
+
+/* ---------------- popover ---------------- */
+
+.popover {
+  position: fixed;
+  z-index: 70;
+  width: 300px;
+  padding: 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--surface-1) 92%, transparent);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-3), var(--inner-top);
+  transform-origin: var(--origin, bottom left);
+  animation: pop-in var(--dur-3) var(--ease-spring);
+}
+.popover.is-leaving { animation: pop-out var(--dur-2) var(--ease-in-out) forwards; }
+@keyframes pop-in { from { opacity: 0; transform: translateY(6px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes pop-out { to { opacity: 0; transform: translateY(4px) scale(.98); } }
+
+.menu-title {
+  padding: 6px 8px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text);
+  font-size: var(--text-small);
+  text-align: start;
+  cursor: pointer;
+  transition: background-color var(--dur-1) var(--ease-out);
+}
+.menu-item:hover, .menu-item:focus-visible { background: var(--surface-2); }
+.menu-item.danger { color: var(--danger); }
+.menu-item.danger:hover { background: var(--danger-soft); }
+.menu-sep { height: 1px; margin: 6px 4px; background: var(--border); }
+
+/* ---------------- misc ---------------- */
+
+.hairline { height: 1px; background: var(--border); }
+.link {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--accent-text);
+  font-size: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.link:hover { color: var(--accent-hover); }
+[data-theme="light"] .link:hover { color: var(--accent-press); }

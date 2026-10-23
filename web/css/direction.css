@@ -1,0 +1,61 @@
+/* ============================================================
+   Ember — writing direction
+   The layout itself is written with logical properties, so it
+   flips on its own when the document direction changes. These
+   are the few places where a physical direction is baked in, and
+   they are all in one file so the right-to-left layout can be
+   read as a whole.
+   ============================================================ */
+
+/* ---------- direction that has to be mirrored ---------- */
+
+/* A chevron points at the next thing. In a right-to-left layout the next
+   thing is to the left, so the glyph is mirrored. */
+[dir="rtl"] .chev { transform: scaleX(-1); }
+
+/* The open state of a disclosure turns the chevron into a down arrow.
+   The mirror has to come first: rotating the unmirrored chevron would
+   point it up. */
+[dir="rtl"] .disclosure[open] summary .chev {
+  transform: scaleX(-1) rotate(90deg);
+}
+
+.advanced-toggle .chev { transition: transform var(--dur-2) var(--ease-out); }
+.advanced-toggle.is-open .chev { transform: rotate(90deg); }
+[dir="rtl"] .advanced-toggle .chev { transform: scaleX(-1); }
+[dir="rtl"] .advanced-toggle.is-open .chev { transform: scaleX(-1) rotate(90deg); }
+
+/* The placeholder shimmer sweeps in from the leading edge, which is the
+   right-hand side in a right-to-left layout. */
+[dir="rtl"] .skeleton::after {
+  transform: translateX(100%);
+  animation-name: shimmer-rtl;
+}
+@keyframes shimmer-rtl { to { transform: translateX(-100%); } }
+
+/* The toast's progress line drains away from the leading edge. */
+[dir="rtl"] .toast-progress { transform-origin: right; }
+
+/* ---------- values that are always read left to right ---------- */
+
+/* An address, a port and a password are read left to right even in a
+   right-to-left layout, and so is the caret that edits them. */
+[dir="rtl"] .input[type="email"],
+[dir="rtl"] .input[type="password"],
+[dir="rtl"] .input.num,
+[dir="rtl"] .code-boxes input {
+  direction: ltr;
+  text-align: left;
+}
+
+/* The six verification-code boxes are one number split into six, so the
+   boxes keep their order. */
+[dir="rtl"] .code-boxes { direction: ltr; }
+
+/* A log line is mostly technical text, and a report can hold a Persian
+   line and an English one side by side. Each line takes the direction of
+   its own first strong character. */
+[dir="rtl"] .log-msg {
+  unicode-bidi: plaintext;
+  text-align: start;
+}

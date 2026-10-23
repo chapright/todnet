@@ -1,0 +1,34 @@
+/* ============================================================
+   Ember — bundled fonts
+   The interface ships with one font of its own: Vazirmatn, the
+   modern Persian UI typeface. It is bundled rather than fetched,
+   because the app has no network dependency for its own chrome
+   and the content security policy only allows its own files.
+
+   The unicode-range is the point of the whole file. Vazirmatn
+   covers the Arabic script, and only the Arabic script: a Latin
+   letter, a digit or a unit falls through to the system font, so
+   TUN, HTTP/2 and an IP address keep the same shapes they have
+   in English. It also means the browser never downloads the font
+   at all in the English locale.
+   ============================================================ */
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../fonts/Vazirmatn-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0600-06FF,   /* Arabic: the Persian letters */
+    U+0750-077F,   /* Arabic Supplement */
+    U+0870-088E,   /* Arabic Extended-B */
+    U+08A0-08FF,   /* Arabic Extended-A */
+    U+200C-200E,   /* zero width non-joiner, joiner, left-to-right mark */
+    U+2010-2011,   /* the hyphens Persian text uses */
+    U+204F,        /* minus sign */
+    U+2E41,        /* a rare symbol */
+    U+FB50-FDFF,   /* Arabic Presentation Forms-A */
+    U+FDFC,        /* the ligature used in some Persian text */
+    U+FE70-FEFF;   /* Arabic Presentation Forms-B */
+}

@@ -1,0 +1,247 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="foxtitle">
+  <title id="foxtitle">Todnet — fox head mark</title>
+
+  <style>
+    /* Detail that only earns its keep above ~110px. Browsers evaluate the
+       query against the SVG viewport, so the same file thins itself out
+       when it is dropped into a 32px slot. */
+    @media (max-width: 110px) { .micro { display: none } }
+  </style>
+
+  <defs>
+    <!-- ===================== colour ===================== -->
+    <linearGradient id="gFur" x1=".1" y1="0" x2=".78" y2="1">
+      <stop offset="0" stop-color="#FFA85C"/>
+      <stop offset=".4" stop-color="#FF7A3D"/>
+      <stop offset="1" stop-color="#D8480A"/>
+    </linearGradient>
+    <linearGradient id="gFurLit" x1=".1" y1="0" x2=".8" y2="1">
+      <stop offset="0" stop-color="#FFC079"/>
+      <stop offset="1" stop-color="#FF8C42"/>
+    </linearGradient>
+    <linearGradient id="gSnout" x1=".5" y1="0" x2=".5" y2="1">
+      <stop offset="0" stop-color="#FF7A3D"/>
+      <stop offset=".55" stop-color="#E2560C"/>
+      <stop offset="1" stop-color="#9E3004"/>
+    </linearGradient>
+    <linearGradient id="gRust" x1="0" y1="0" x2=".28" y2="1">
+      <stop offset="0" stop-color="#C24708"/>
+      <stop offset="1" stop-color="#7C2504"/>
+    </linearGradient>
+    <linearGradient id="gCream" x1=".2" y1="0" x2=".85" y2="1">
+      <stop offset="0" stop-color="#FFF6EA"/>
+      <stop offset=".52" stop-color="#F1D9B9"/>
+      <stop offset="1" stop-color="#C6A47C"/>
+    </linearGradient>
+    <linearGradient id="gCreamDeep" x1="0" y1="0" x2=".4" y2="1">
+      <stop offset="0" stop-color="#DCBE9A"/>
+      <stop offset="1" stop-color="#B08C68"/>
+    </linearGradient>
+    <radialGradient id="gIris" cx=".38" cy=".28" r=".8">
+      <stop offset="0" stop-color="#FFE9A8"/>
+      <stop offset=".46" stop-color="#F2A81F"/>
+      <stop offset="1" stop-color="#9C4F06"/>
+    </radialGradient>
+    <linearGradient id="gNose" x1=".22" y1="0" x2=".72" y2="1">
+      <stop offset="0" stop-color="#4E372E"/>
+      <stop offset=".42" stop-color="#1C1210"/>
+      <stop offset="1" stop-color="#0A0707"/>
+    </linearGradient>
+
+    <!-- Key light (upper left) and fill shadow (lower right). Both live in
+         root space so the light does not flip with the mirrored geometry. -->
+    <radialGradient id="gKey" gradientUnits="userSpaceOnUse" cx="164" cy="104" r="252">
+      <stop offset="0" stop-color="#FFE3B6" stop-opacity=".58"/>
+      <stop offset=".55" stop-color="#FFCE93" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#FFCE93" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="gFill" gradientUnits="userSpaceOnUse" cx="386" cy="424" r="284">
+      <stop offset="0" stop-color="#370D02" stop-opacity=".5"/>
+      <stop offset=".58" stop-color="#370D02" stop-opacity=".15"/>
+      <stop offset="1" stop-color="#370D02" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ===================== shape ===================== -->
+    <!-- Right ear. The head is drawn once and mirrored, so every coordinate
+         here lives in the right half (x >= 256). -->
+    <path id="pEar" d="M 300 156 Q 328 100 352 44 Q 358 34 361 46 L 373 202 Z"/>
+
+    <!-- Right half of the outer silhouette. Left open on purpose: it fills
+         as if closed, but strokes only the real contour, never the seam
+         down the middle of the face. -->
+    <path id="pHead" d="M 256 100 C 268 96 286 120 300 156 Q 328 100 352 44 Q 358 34 361 46 L 373 202 L 390 226 L 400 244 Q 420 252 423 270 Q 412 272 411 282 Q 420 290 419 303 Q 408 302 405 312 Q 410 322 404 332 Q 394 328 391 338 Q 393 348 386 356 Q 377 351 372 350 Q 372 368 358 380 Q 353 371 348 362 Q 344 384 326 392 Q 321 381 316 374 Q 312 391 293 398 Q 290 389 286 382 Q 280 399 263 404 Q 260 397 258 392 Q 256 403 256 412"/>
+
+    <!-- Inner edge of the cheek ruff: where cream meets rust. -->
+    <path id="pRuffEdge" d="M 400 244 L 366 258 L 338 282 L 318 308 L 304 334 L 294 360 L 282 386 L 268 398 L 256 400"/>
+
+    <!-- Lower contour of the ruff, used for the jaw shading. -->
+    <path id="pJaw" d="M 423 270 Q 412 272 411 282 Q 420 290 419 303 Q 408 302 405 312 Q 410 322 404 332 Q 394 328 391 338 Q 393 348 386 356 Q 377 351 372 350 Q 372 368 358 380 Q 353 371 348 362 Q 344 384 326 392 Q 321 381 316 374 Q 312 391 293 398 Q 290 389 286 382 Q 280 399 263 404 Q 260 397 258 392 Q 256 403 256 412"/>
+
+    <!-- Right eye opening. -->
+    <path id="pEye" d="M 300 268 Q 334 228 376 244 Q 342 288 300 268 Z"/>
+
+    <clipPath id="cEarR"><use href="#pEar"/></clipPath>
+    <clipPath id="cHead">
+      <use href="#pHead"/>
+      <use href="#pHead" transform="translate(512 0) scale(-1 1)"/>
+    </clipPath>
+    <!-- One eye clip serves both eyes: the clip path inherits the user space
+         of the element that references it, so the mirrored eye group already
+         mirrors the clip. A second, pre-mirrored clip would cancel that out
+         and clip the iris clean away. -->
+    <clipPath id="cEye"><use href="#pEye"/></clipPath>
+
+    <filter id="fGrain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="1.25" numOctaves="2" seed="11" result="t"/>
+      <feColorMatrix in="t" type="saturate" values="0"/>
+    </filter>
+  </defs>
+
+  <g transform="translate(256 256) scale(1.06) translate(-256 -223)">
+    <!-- ================== right half ================== -->
+    <g id="half">
+      <!-- base fur -->
+      <use href="#pHead" fill="url(#gFur)"/>
+
+      <!-- ear -->
+      <use href="#pEar" fill="url(#gFur)"/>
+      <g clip-path="url(#cEarR)">
+        <!-- black tip, sweeping further down the back of the ear -->
+        <path d="M 292 16 L 408 16 L 408 124 L 326 80 Z" fill="#17100F"/>
+        <!-- inner ear cavity -->
+        <path d="M 314 170 L 342 80 L 360 178 Z" fill="#241A18"/>
+        <path d="M 322 166 L 342 100 L 352 168 Z" fill="#6B4227"/>
+        <!-- auricular fur -->
+        <path d="M 320 168 L 332 140 L 329 155 L 344 146 L 337 162 L 350 164 L 334 174 Z" fill="#F1D9B9"/>
+        <!-- shadow where the ear meets the skull -->
+        <path d="M 288 196 L 382 238 L 378 208 L 302 168 Z" fill="#3A1002" opacity=".45"/>
+      </g>
+
+      <!-- skull facets -->
+      <!-- crown band along the top of the skull -->
+      <path d="M 256 100 C 268 96 286 120 300 156 L 306 172 Q 276 144 256 116 Z" fill="url(#gFurLit)"/>
+      <!-- brow crease -->
+      <path d="M 292 238 Q 330 210 380 224 L 376 240 Q 330 226 296 248 Z" fill="#A83604" opacity=".45"/>
+
+      <!-- rust band above the ruff -->
+      <path d="M 400 244 L 366 258 L 338 282 L 318 308 L 304 334 L 294 360 L 282 386 L 268 398 L 256 400"
+            fill="none" stroke="url(#gRust)" stroke-width="27" stroke-linejoin="round" stroke-linecap="round"/>
+
+      <!-- cheek ruff -->
+      <path d="M 400 244 L 366 258 L 338 282 L 318 308 L 304 334 L 294 360 L 282 386 L 268 398 L 256 400
+               L 256 412
+               Q 256 403 258 392
+               Q 260 397 263 404
+               Q 280 399 286 382
+               Q 290 389 293 398
+               Q 312 391 316 374
+               Q 321 381 326 392
+               Q 344 384 348 362
+               Q 353 371 358 380
+               Q 372 368 372 350
+               Q 377 351 386 356
+               Q 393 348 391 338
+               Q 394 328 404 332
+               Q 410 322 405 312
+               Q 408 302 419 303
+               Q 420 290 411 282
+               Q 412 272 423 270
+               Q 420 252 400 244 Z" fill="url(#gCream)"/>
+      <!-- shaded lower jaw -->
+      <g clip-path="url(#cHead)">
+        <use href="#pJaw" fill="none" stroke="url(#gCreamDeep)" stroke-width="22" stroke-linejoin="round" stroke-linecap="round"/>
+      </g>
+    </g>
+
+    <!-- mirror -->
+    <use href="#half" transform="translate(512 0) scale(-1 1)"/>
+
+    <!-- ================== centre ================== -->
+    <g id="mid">
+      <!-- shadow under the muzzle edge -->
+      <path d="M 256 262 Q 274 266 284 290 Q 291 314 289 338 Q 286 362 277 376
+               Q 265 390 256 390 Q 247 390 235 376 Q 226 362 223 338 Q 221 314 228 290
+               Q 238 266 256 262 Z"
+            fill="none" stroke="#5E1A05" stroke-width="12" stroke-linejoin="round" opacity=".2"/>
+      <!-- whisker pads and muzzle -->
+      <path d="M 256 262 Q 274 266 284 290 Q 291 314 289 338 Q 286 362 277 376
+               Q 265 390 256 390 Q 247 390 235 376 Q 226 362 223 338 Q 221 314 228 290
+               Q 238 266 256 262 Z" fill="url(#gCream)"/>
+      <!-- dorsal snout bridge: runs up under the forehead marking so it has
+           no visible top edge and never reads as a separate tube. No facet
+           highlight here on purpose — a bright edge down one side of a
+           narrow shape turns it into a cylinder. The root-space key light
+           does that job without modelling the snout as an object. -->
+      <path d="M 256 228 L 270 256 L 272 290 L 272 316 L 269 336 L 256 336
+               L 243 336 L 240 316 L 240 290 L 242 256 Z" fill="url(#gSnout)"/>
+
+      <!-- forehead marking -->
+      <path d="M 256 156 L 286 200 L 256 244 L 226 200 Z" fill="#C25210"/>
+      <path d="M 256 162 L 280 200 L 256 238 L 232 200 Z" fill="#FFF6EA"/>
+      <path d="M 256 200 L 280 200 L 256 238 Z" fill="#E4C9A6"/>
+
+      <!-- nose -->
+      <path d="M 230 328 Q 230 319 239 317 L 273 317 Q 282 319 282 328 Q 280 346 256 360 Q 232 346 230 328 Z" fill="url(#gNose)"/>
+      <path d="M 237 333 Q 244 327 248 333 Q 244 339 237 337 Z" fill="#050404"/>
+      <path d="M 275 333 Q 268 327 264 333 Q 268 339 275 337 Z" fill="#050404"/>
+      <path d="M 237 320 Q 248 316 261 318 Q 252 322 237 323 Z" fill="#FFF6EA" opacity=".28"/>
+      <!-- philtrum and mouth -->
+      <path d="M 256 358 L 256 376" stroke="#2A1C16" stroke-width="3.4" stroke-linecap="round" fill="none"/>
+      <path d="M 256 375 Q 247 383 238 380 M 256 375 Q 265 383 274 380"
+            stroke="#1C1210" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+      <!-- whisker follicles -->
+      <g class="micro" fill="#9E764F" opacity=".6">
+        <circle cx="238" cy="344" r="1.7"/>
+        <circle cx="232" cy="352" r="1.5"/>
+        <circle cx="274" cy="344" r="1.7"/>
+        <circle cx="280" cy="352" r="1.5"/>
+      </g>
+    </g>
+
+    <!-- ================== eyes ================== -->
+    <g id="eyes">
+      <g>
+        <path d="M 298 264 Q 332 224 378 240 Q 344 294 298 264 Z" fill="#241A18" opacity=".35"/>
+        <path d="M 300 268 Q 334 228 376 244 Q 342 288 300 268 Z" fill="#17100F"/>
+        <g clip-path="url(#cEye)">
+          <circle cx="338" cy="256" r="15.5" fill="url(#gIris)"/>
+          <path d="M 292 224 H 388 L 388 244 Q 340 236 292 244 Z" fill="#3A1002" opacity=".5"/>
+          <ellipse cx="338" cy="256" rx="5.4" ry="12" fill="#120C0B"/>
+        </g>
+        <path d="M 300 268 Q 334 228 376 244" fill="none" stroke="#17100F" stroke-width="3" stroke-linecap="round"/>
+        <path d="M 306 274 Q 340 288 370 254" fill="none" stroke="#8F2A04" stroke-width="3.4" stroke-linecap="round" opacity=".5"/>
+        <circle class="micro" cx="330" cy="249" r="4.4" fill="#FFF6EA"/>
+        <circle class="micro" cx="347" cy="263" r="1.9" fill="#FFF6EA" opacity=".8"/>
+      </g>
+      <g transform="translate(512 0) scale(-1 1)">
+        <path d="M 298 264 Q 332 224 378 240 Q 344 294 298 264 Z" fill="#241A18" opacity=".35"/>
+        <path d="M 300 268 Q 334 228 376 244 Q 342 288 300 268 Z" fill="#17100F"/>
+        <g clip-path="url(#cEye)">
+          <circle cx="338" cy="256" r="15.5" fill="url(#gIris)"/>
+          <path d="M 292 224 H 388 L 388 244 Q 340 236 292 244 Z" fill="#3A1002" opacity=".5"/>
+          <ellipse cx="338" cy="256" rx="5.4" ry="12" fill="#120C0B"/>
+        </g>
+        <path d="M 300 268 Q 334 228 376 244" fill="none" stroke="#17100F" stroke-width="3" stroke-linecap="round"/>
+        <path d="M 306 274 Q 340 288 370 254" fill="none" stroke="#8F2A04" stroke-width="3.4" stroke-linecap="round" opacity=".5"/>
+        <circle class="micro" cx="330" cy="249" r="4.4" fill="#FFF6EA"/>
+        <circle class="micro" cx="347" cy="263" r="1.9" fill="#FFF6EA" opacity=".8"/>
+      </g>
+    </g>
+
+    <!-- ================== light ================== -->
+    <g clip-path="url(#cHead)" pointer-events="none">
+      <rect width="512" height="512" fill="url(#gKey)"/>
+      <rect width="512" height="512" fill="url(#gFill)"/>
+    </g>
+
+    <!-- ================== fur grain ================== -->
+    <g class="micro" clip-path="url(#cHead)" opacity=".1" style="mix-blend-mode:overlay" pointer-events="none">
+      <rect width="512" height="512" filter="url(#fGrain)"/>
+    </g>
+
+    <!-- ================== contour ================== -->
+    <use href="#pHead" fill="none" stroke="#17100F" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="butt"/>
+    <use href="#pHead" transform="translate(512 0) scale(-1 1)" fill="none" stroke="#17100F" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="butt"/>
+  </g>
+</svg>

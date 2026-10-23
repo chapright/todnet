@@ -1,0 +1,23 @@
+<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="todnet-icon-title">
+  <title id="todnet-icon-title">Todnet</title>
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#302521"/>
+      <stop offset=".55" stop-color="#1C1614"/>
+      <stop offset="1" stop-color="#0F0C0B"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".44" r=".58">
+      <stop offset="0" stop-color="#FF7A3D" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#FF7A3D" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="mark" x1="0" y1="0" x2=".35" y2="1">
+      <stop offset="0" stop-color="#FFA06B"/>
+      <stop offset=".55" stop-color="#FF7A3D"/>
+      <stop offset="1" stop-color="#F06A2C"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="8.2" fill="url(#tile)"/>
+  <rect width="32" height="32" rx="8.2" fill="url(#glow)"/>
+  <rect x=".55" y=".55" width="30.9" height="30.9" rx="7.7" fill="none" stroke="#FFFFFF" stroke-opacity=".10" stroke-width=".9"/>
+  <path fill="url(#mark)" fill-rule="evenodd" d="M6.2 5.2L12.2 10.0C13.4 9.4 14.7 9.1 16 9.1C17.3 9.1 18.6 9.4 19.8 10.0L25.8 5.2L26.7 14.6C26.7 19.8 22.6 24.0 16 27.2C9.4 24.0 5.3 19.8 5.3 14.6ZM11.45 14.35A1.55 1.55 0 1 0 11.45 17.45A1.55 1.55 0 1 0 11.45 14.35ZM20.55 14.35A1.55 1.55 0 1 0 20.55 17.45A1.55 1.55 0 1 0 20.55 14.35ZM14.35 19.25L17.65 19.25L16 21.15Z"/>
+</svg>

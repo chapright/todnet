@@ -1,0 +1,32 @@
+name: go
+
+# The client is a Windows app whose interface ships as static files embedded
+# in the binary, so there is no JavaScript build step and nothing to install:
+# the Go tests are the gate.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27'
+          cache: true
+
+      - name: build
+        run: go build ./...
+
+      # The unit tests of the control plane, the engine, the account store
+      # and the tunnel. The proxy tests are opt-in: they write to HKCU.
+      - name: go test
+        run: go test ./internal/...

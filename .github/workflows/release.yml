@@ -1,0 +1,79 @@
+name: release
+
+# Publishing: push a tag like v1.2.0, and this workflow builds the app, the
+# portable zip and the Windows installer, then attaches all three (plus
+# SHA256SUMS.txt) to a GitHub Release. It can also be run by hand from the
+# Actions tab; without an input it uses the version in main.go.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to build (e.g. 1.2.0); defaults to main.go"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.27"
+          cache: true
+
+      - name: Resolve version
+        id: version
+        shell: pwsh
+        env:
+          REF_NAME: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          $v = ""
+          if ($env:REF_TYPE -eq "tag" -and $env:REF_NAME -like "v*") { $v = $env:REF_NAME }
+          if ($env:INPUT_VERSION) { $v = $env:INPUT_VERSION }
+          $v = $v.TrimStart("v")
+          if (-not $v) {
+            $main = Get-Content main.go -Raw
+            $m = [regex]::Match($main, 'var version = "([^"]+)"')
+            if (-not $m.Success) { throw "No version given and main.go has none." }
+            $v = $m.Groups[1].Value
+          }
+          "version=$v" | Out-File -Append -Encoding utf8 $env:GITHUB_OUTPUT
+
+      # Same gate as the go workflow: if the tests fail, nothing is published.
+      - name: Test
+        run: go test ./internal/...
+
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Build release artifacts
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if ($env:VERSION) {
+            ./tools/build-release.ps1 -Version $env:VERSION
+          } else {
+            ./tools/build-release.ps1
+          }
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          generate_release_notes: true
+          files: |
+            dist/Todnet-*-setup.exe
+            dist/Todnet-*-windows-x64.zip
+            dist/SHA256SUMS.txt

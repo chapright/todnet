@@ -1,0 +1,284 @@
+/* ============================================================
+   Ember — design tokens
+   Dark is the default look. Light is the same structure on
+   warm paper. Every colour outside this file is a bug.
+   Contrast verified against WCAG 2.1; see the note on
+   --border-strong and --focus-ring for the two values that
+   had to move to reach SC 1.4.11.
+   ============================================================ */
+
+:root {
+  color-scheme: dark;
+
+  /* surfaces */
+  --bg: #0E0C0B;
+  --surface-1: #161311;
+  --surface-2: #1E1A17;
+  --surface-3: #272220;
+  --surface-veil: rgba(22, 19, 17, .72);
+
+  --border: rgba(255, 255, 255, .07);
+  /* 3.12:1 against --surface-2, so a text field's edge is
+     identifiable without relying on the fill. The previous .12
+     gave 1.42:1, which is a decorative hairline at best. */
+  --border-strong: rgba(255, 255, 255, .34);
+
+  /* text */
+  --text: #F5EFEB;
+  --text-2: #B8ABA3;
+  --text-3: #978A83; /* >= 4.5:1 on bg and all three surfaces */
+  /* Used when the user asks for more contrast. */
+  --text-3-strong: #C0B3AB;
+
+  /* brand + semantics */
+  --accent: #FF7A3D;
+  --accent-hover: #FF8A52;
+  --accent-press: #F06A2C;
+  --accent-ink: #1A0C05;
+  --accent-text: #FF9A66;
+  /* Used for indicators — borders, arcs, selection bars — where the
+     colour has to be readable as a shape and not as a tint. */
+  --accent-strong: #FF7A3D;
+  --accent-soft: rgba(255, 122, 61, .14);
+  --accent-line: rgba(255, 122, 61, .32);
+  --accent-grad-start: #FF8A52;
+  --accent-grad-end: #F06A2C;
+  --on-accent: #FFFFFF;
+
+  /* The download series used to be --text-3, i.e. the same grey as the
+     card chrome, and vanished into it. Cool blue separates the two lines
+     by hue as well as by position: 10.3:1 on --surface-1. */
+  --chart-down: #7CC7FF;
+  /* Allowance ring: a quiet track, and an arc whose two ends keep enough
+     contrast to be read as a shape (start 8.0:1, end 6.1:1 on surface-1). */
+  --ring-track: rgba(245, 239, 235, .10);
+  --ring-start: #FFA06B;
+  --ring-end: #FF5A1F;
+
+  --ok: #3DDC97;
+  --ok-soft: rgba(61, 220, 151, .12);
+  --ok-line: rgba(61, 220, 151, .34);
+  --warn: #FFC857;
+  --warn-soft: rgba(255, 200, 87, .12);
+  --warn-line: rgba(255, 200, 87, .34);
+  --danger: #FF7B72;
+  --danger-soft: rgba(255, 123, 114, .12);
+  --danger-line: rgba(255, 123, 114, .34);
+
+  /* ambient orb tints */
+  --glow: rgba(255, 122, 61, .30);
+  --glow-soft: rgba(255, 122, 61, .10);
+  --warn-glow: rgba(255, 200, 87, .20);
+  --danger-glow: rgba(255, 123, 114, .18);
+
+  /* connected orb: the light is built from stops and a rim, not paint.
+     The light theme re-tunes these instead of adding literals. */
+  --orb-lit-1: rgba(255, 154, 102, .30);
+  --orb-lit-2: rgba(255, 122, 61, .10);
+  --orb-lit-3: rgba(255, 122, 61, .16);
+  --orb-rim: rgba(255, 122, 61, .55);
+  --orb-rim-in: rgba(255, 122, 61, .18);
+  --orb-halo: rgba(255, 122, 61, .30);
+  --orb-cast: rgba(0, 0, 0, .45);
+  --orb-glyph-glow: rgba(255, 122, 61, .55);
+
+  /* the flag chip's hairline edge */
+  --chip-ring: rgba(255, 255, 255, .10);
+  --chip-cast: rgba(0, 0, 0, .25);
+
+  /* elevation */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .35), 0 8px 24px rgba(0, 0, 0, .22);
+  --shadow-2: 0 10px 30px rgba(0, 0, 0, .38), 0 2px 8px rgba(0, 0, 0, .30);
+  --shadow-3: 0 30px 80px rgba(0, 0, 0, .55), 0 8px 24px rgba(0, 0, 0, .35);
+  --inner-top: inset 0 1px 0 rgba(255, 255, 255, .05);
+
+  /* focus */
+  /* A single-colour ring cannot work on an accent fill: #FF7A3D is
+     too light for a light ring (1.24:1) and too dark for a white one
+     (2.59:1). The ring is therefore paired with a halo of the
+     opposite luminance, so one of the two always separates the
+     indicator from whatever it is drawn over. */
+  --focus-ring: var(--text);
+  --focus-halo: #000000;
+  /* The switch knob is white on an accent track, which is 2.59:1. The
+     knob's edge is what identifies it, so the edge is given a solid
+     dark ink: 7.5:1 against the track. */
+  --knob-edge: #1A0C05;
+
+  /* avatar ramp — every entry is >= 4.5:1 with white text */
+  --avatar-1: #A63D2A;
+  --avatar-2: #8A4B1F;
+  --avatar-3: #7A5A12;
+  --avatar-4: #2F6B3A;
+  --avatar-5: #1F6B63;
+  --avatar-6: #2B4F8A;
+  --avatar-7: #5B3F8A;
+  --avatar-8: #8A2F63;
+
+  /* type */
+  /* Vazirmatn is the bundled Persian face. Its unicode-range covers the
+     Arabic script only, so in the English locale it is never used and
+     never downloaded, and the Latin text keeps these faces. */
+  --font: "Vazirmatn", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Cascadia Mono", "Consolas", ui-monospace, monospace;
+
+  --text-micro: 11px;
+  --text-micro-lh: 14px;
+  --text-caption: 12px;
+  --text-caption-lh: 16px;
+  --text-small: 13px;
+  --text-small-lh: 18px;
+  --text-body: 14px;
+  --text-body-lh: 20px;
+  --text-subtitle: 16px;
+  --text-subtitle-lh: 24px;
+  --text-readout: 15px;
+  --text-readout-lh: 22px;
+  --text-title: 20px;
+  --text-title-lh: 28px;
+  --text-headline: 28px;
+  --text-headline-lh: 34px;
+  --text-display: 40px;
+  --text-display-lh: 44px;
+
+  /* space */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-14: 56px;
+
+  /* radii */
+  --r-xs: 6px;
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-full: 999px;
+
+  /* window chrome */
+  --window-border: #4A423D;
+
+  /* layout */
+  --titlebar-h: 40px;
+  --rail-w: 208px;
+  --rail-w-compact: 76px;
+  --content-max: 1120px;
+  --orb-size: 208px;
+  --orb-core: 150px;
+  --min-w: 760px;
+  --min-h: 560px;
+
+  /* motion */
+  --dur-1: 80ms;
+  --dur-2: 140ms;
+  --dur-3: 220ms;
+  --dur-4: 360ms;
+  --dur-5: 700ms;
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --ease-spring: linear(0, .25 8%, .62 18%, .94 30%, 1.06 42%, 1.04 54%, .99 70%, 1);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #FBF7F4;
+  --surface-1: #FFFFFF;
+  --surface-2: #F1E7DF;
+  --surface-3: #EEE4DD;
+  --surface-veil: rgba(255, 255, 255, .78);
+
+  --border: rgba(40, 20, 10, .10);
+  /* 3.04:1 against --surface-2. On a light surface a border this dark
+     is the only way to reach 3:1 — the maths caps out below a mid
+     grey — so it is deliberately visible rather than a hairline. */
+  --border-strong: rgba(40, 20, 10, .48);
+
+  --text: #1E1612;
+  --text-2: #5C4D46;
+  --text-3: #6F6058; /* 4.81:1 on surface-3 */
+  --text-3-strong: #4E413A;
+
+  --accent: #FF7A3D;
+  --accent-hover: #FF8A52;
+  --accent-press: #F06A2C;
+  --accent-ink: #1A0C05;
+  --accent-text: #B23A05; /* 4.79:1 on surface-3 */
+  /* #FF7A3D on white is only 2.59:1, so indicators use this instead. */
+  --accent-strong: #B23A05;
+  --accent-soft: rgba(255, 122, 61, .16);
+  --accent-line: rgba(255, 122, 61, .45);
+  --accent-grad-start: #FF8A52;
+  --accent-grad-end: #F06A2C;
+  --on-accent: #FFFFFF;
+
+  --chart-down: #1C63A8; /* 6.2:1 on --surface-1 */
+  /* Both ends clear 4.5:1 on white, unlike the bright gradient tokens. */
+  --ring-track: rgba(30, 22, 18, .10);
+  --ring-start: #C2410C;
+  --ring-end: #9A2C00;
+
+  --ok: #0E7043; /* 4.91:1 on surface-3; the previous #0F7A4A was 4.30 */
+  --ok-soft: rgba(15, 122, 74, .10);
+  --ok-line: rgba(15, 122, 74, .28);
+  --warn: #8A5A00;
+  --warn-soft: rgba(138, 90, 0, .10);
+  --warn-line: rgba(138, 90, 0, .28);
+  --danger: #B3261E;
+  --danger-soft: rgba(179, 38, 30, .09);
+  --danger-line: rgba(179, 38, 30, .26);
+
+  --glow: rgba(255, 122, 61, .26);
+  --glow-soft: rgba(255, 122, 61, .09);
+  --warn-glow: rgba(196, 138, 0, .16);
+  --danger-glow: rgba(179, 38, 30, .13);
+
+  /* The connected orb stays a lit surface, not a peach disc: a warm
+     highlight over the surface, a solid rim, and a soft cast. */
+  --orb-lit-1: rgba(255, 168, 122, .46);
+  --orb-lit-2: rgba(255, 122, 61, .10);
+  --orb-lit-3: rgba(255, 122, 61, .10);
+  --orb-rim: #E85F22;
+  --orb-rim-in: rgba(255, 255, 255, .88);
+  --orb-halo: rgba(255, 122, 61, .24);
+  --orb-cast: rgba(120, 60, 20, .16);
+  --orb-glyph-glow: transparent;
+
+  --chip-ring: rgba(40, 20, 10, .14);
+  --chip-cast: rgba(40, 20, 10, .08);
+
+  --shadow-1: 0 1px 2px rgba(70, 30, 10, .05), 0 8px 24px rgba(70, 30, 10, .06);
+  --shadow-2: 0 12px 32px rgba(70, 30, 10, .12), 0 2px 8px rgba(70, 30, 10, .06);
+  --shadow-3: 0 30px 80px rgba(70, 30, 10, .18), 0 8px 24px rgba(70, 30, 10, .08);
+  --inner-top: inset 0 1px 0 rgba(255, 255, 255, .7);
+
+  --focus-ring: var(--text);
+  --focus-halo: #FFFFFF;
+  --knob-edge: #1E1612;
+  --window-border: #C9B4A6;
+
+  /* The warm core of the connected orb on a light surface. */
+  --orb-warm-1: #FFF6F0;
+  --orb-warm-2: #FFEDE2;
+
+  /* The ramp reads muddy on warm paper, so it is deepened. Every entry
+     is still >= 4.5:1 with white text. */
+  --avatar-1: #8E3122;
+  --avatar-2: #6E3A15;
+  --avatar-3: #5E460C;
+  --avatar-4: #23522C;
+  --avatar-5: #17504B;
+  --avatar-6: #1F3C6B;
+  --avatar-7: #452E6B;
+  --avatar-8: #6B2449;
+}
+
+/* Compact rail below 860px. The default window is 1000px wide, so the
+   labelled rail is what the app actually shows on launch. */
+@media (max-width: 859px) {
+  :root { --rail-w: var(--rail-w-compact); }
+}

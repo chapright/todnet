@@ -1,0 +1,417 @@
+/* ============================================================
+   Ember — base
+   Reset, typography, focus, scrollbars, global modes.
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font);
+  font-size: var(--text-body);
+  line-height: var(--text-body-lh);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: auto; /* ClearType on Windows (T-03) */
+  text-rendering: optimizeLegibility;
+  transition: background-color var(--dur-3) var(--ease-out), color var(--dur-3) var(--ease-out);
+  /* The title bar is part of the page, so the body is a column: the bar on
+     top, the application filling what is left. */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Windows 11 draws the window hairline and rounds the corners in DWM. On
+   Windows 10 neither exists, so the interface draws the hairline itself:
+   one pixel at the client edge, above the page chrome but never in the way
+   of a click. A maximized window has no outside edge to outline. */
+body.native-shell:not(.has-rounded-window)::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  border: 1px solid var(--window-border);
+}
+body.native-shell.is-maximized::after { border-color: transparent; }
+
+h1, h2, h3, p { margin: 0; }
+button, input, select { font: inherit; color: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+svg { display: block; }
+
+/* Author display rules beat the UA [hidden] rule; keep the attribute honest. */
+[hidden] { display: none !important; }
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* ---------- focus ---------- */
+
+:focus { outline: none; }
+
+/* A single-colour ring cannot satisfy SC 1.4.11 on an accent fill:
+   #FF7A3D is too light for a light ring (1.24:1) and too dark for a
+   white one (2.59:1). The ring is therefore paired with a halo of the
+   opposite luminance, so one of the two always separates the indicator
+   from whatever it is drawn over. */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--focus-halo);
+  animation: focus-in var(--dur-2) var(--ease-out);
+}
+
+/* Route changes land focus on the view heading. A heading is a reading
+   target, not a control, so it should not draw the control ring. */
+.view h1[tabindex="-1"]:focus,
+.view h1[tabindex="-1"]:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* The primary button's own glow has to survive the focus halo. */
+.btn.primary:focus-visible {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .18) inset, 0 6px 18px var(--glow-soft), 0 0 0 4px var(--focus-halo);
+}
+
+@keyframes focus-in {
+  from { outline-offset: 0; }
+  to { outline-offset: 2px; }
+}
+
+/* ---------- type helpers ---------- */
+
+.t-display { font-size: var(--text-display); line-height: var(--text-display-lh); font-weight: 600; letter-spacing: -.02em; }
+.t-headline { font-size: var(--text-headline); line-height: var(--text-headline-lh); font-weight: 600; letter-spacing: -.015em; }
+.t-title { font-size: var(--text-title); line-height: var(--text-title-lh); font-weight: 600; letter-spacing: -.01em; }
+.t-subtitle { font-size: var(--text-subtitle); line-height: var(--text-subtitle-lh); font-weight: 600; }
+.t-readout { font-size: var(--text-readout); line-height: var(--text-readout-lh); font-weight: 600; }
+.t-body { font-size: var(--text-body); line-height: var(--text-body-lh); }
+.t-small { font-size: var(--text-small); line-height: var(--text-small-lh); }
+.t-caption { font-size: var(--text-caption); line-height: var(--text-caption-lh); }
+.t-micro { font-size: var(--text-micro); line-height: var(--text-micro-lh); }
+.t-2 { color: var(--text-2); }
+.t-3 { color: var(--text-3); }
+.num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+.mono { font-family: var(--font-mono); }
+.ltr { direction: ltr; unicode-bidi: isolate; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+
+/* ---------- scrollbars ---------- */
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--r-full);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text-3); background-clip: content-box; }
+
+/* ---------- resize edges ---------- */
+
+/* The window has no system frame, so the page reports presses on its edges
+   to the native side. Over every element on an edge, the cursor is the one
+   hint that the press will resize rather than click. */
+html[data-resize-edge] * { cursor: var(--resize-cursor, default) !important; }
+
+/* ---------- the app's own title bar ---------- */
+
+/* The window draws its own title bar, so it is part of the design rather
+   than a strip of default Windows chrome sitting on top of it. The
+   native caption is removed and the top strip of the client area is
+   reported to the window manager as a caption, so the window still
+   drags, still maximises on a double click and still offers the Windows
+   11 snap layouts.
+
+   The system frame is removed as well, so the bar starts at the very top
+   of the window: there is no band of native chrome above it. The three
+   buttons occupy a group of their own at the trailing edge. */
+.titlebar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  height: var(--titlebar-h);
+  /* The trailing padding is the gap between the button group and the
+     window edge. The native hit test uses the same number. */
+  padding-inline: 10px 6px;
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--border);
+  user-select: none;
+  /* The window's own chrome sits above the dialogs. The scrim covers the
+     whole page, and the minimise, maximise and close buttons have to
+     keep working while a dialog is open. */
+  position: relative;
+  z-index: 100;
+  /* The bar keeps the order it has in English in every language: the state
+     on the left, the buttons on the right. Only the words inside it change.
+     The text itself still runs right to left when it is Persian. */
+  direction: ltr;
+}
+/* The bar carries the state, so the window says what it is doing even
+   when it is in the background. The dot is the same vocabulary the rest
+   of the interface uses for the state chip. */
+.titlebar-state {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-micro);
+  font-weight: 600;
+  color: var(--text-3);
+}
+.titlebar-state-text {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.titlebar-dot {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-3);
+}
+.titlebar-dot[data-tone="ok"] { background: var(--ok); box-shadow: 0 0 0 3px var(--ok-soft); }
+.titlebar-dot[data-tone="busy"] { background: var(--warn); }
+.titlebar-dot[data-tone="error"] { background: var(--danger); }
+
+/* The window buttons are a floating group rather than a row of Windows
+   chrome: a hairline capsule with the app's own icon shapes in it. The
+   group is 108 pixels wide, which the native hit test relies on. */
+.titlebar-buttons {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+}
+.tb-btn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-1) var(--ease-out),
+    color var(--dur-1) var(--ease-out),
+    transform var(--dur-1) var(--ease-out);
+}
+.tb-btn:hover { background: var(--surface-3); color: var(--text); }
+.tb-btn:active { transform: scale(.94); }
+.tb-btn:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.tb-btn.is-close:hover { background: var(--danger); color: var(--on-accent); }
+.tb-btn svg { width: 15px; height: 15px; }
+
+/* ---------- app frame ---------- */
+
+.app {
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Without an account there is nothing else to look at, so the rail goes
+   away and the home screen holds the sign-in. */
+body.is-signed-out .rail { display: none; }
+body.is-signed-out .app { grid-template-columns: minmax(0, 1fr); }
+
+.main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.view-host {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.view {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--s-6) var(--s-8) var(--s-8);
+}
+
+.view-inner {
+  width: 100%;
+  max-width: var(--content-max);
+  margin-inline: auto;
+}
+
+/* Directional reveal for view changes. The start frame is a small slide
+   rather than a fade: a view that appears at half opacity is a flash of
+   the page behind it. This is the fallback for a browser that cannot do
+   a view transition; with one running, the transition moves the view
+   instead. */
+.view.is-entering-forward { animation: view-in-forward var(--dur-3) var(--ease-out); }
+.view.is-entering-back { animation: view-in-back var(--dur-3) var(--ease-out); }
+
+@keyframes view-in-forward {
+  from { transform: translateY(6px); }
+  to { transform: none; }
+}
+@keyframes view-in-back {
+  from { transform: translateY(-5px); }
+  to { transform: none; }
+}
+
+/* ---------- utilities ---------- */
+
+.row { display: flex; align-items: center; gap: var(--s-2); }
+.col { display: flex; flex-direction: column; }
+.grow { flex: 1 1 auto; min-width: 0; }
+.wrap { flex-wrap: wrap; }
+.spacer { flex: 1 1 auto; }
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- high contrast ---------- */
+
+/* A user who asks for more contrast gets it. The base tokens already
+   pass AA, so this mainly strengthens the edges and the muted text. */
+@media (prefers-contrast: more) {
+  :root {
+    --border: rgba(255, 255, 255, .34);
+    --border-strong: rgba(255, 255, 255, .62);
+    --text-3: var(--text-3-strong);
+  }
+  [data-theme="light"] {
+    --border: rgba(40, 20, 10, .34);
+    --border-strong: rgba(40, 20, 10, .72);
+    --text-3: var(--text-3-strong);
+  }
+}
+
+/* ---------- forced colors (W-08) ---------- */
+
+@media (forced-colors: active) {
+  * { forced-color-adjust: auto; }
+
+  .card, .group, .rail, .modal, .popover, .banner, .toast {
+    border: 1px solid CanvasText !important;
+    background: Canvas !important;
+    box-shadow: none !important;
+  }
+
+  .nav-item.is-active,
+  .loc-item.is-selected,
+  .seg-thumb {
+    background: Highlight !important;
+    color: HighlightText !important;
+    forced-color-adjust: none;
+  }
+
+  .switch {
+    border: 1px solid CanvasText !important;
+    background: Canvas !important;
+  }
+  .switch[aria-checked="true"] {
+    background: Highlight !important;
+    forced-color-adjust: none;
+  }
+  .switch[aria-checked="true"] .switch-knob {
+    background: HighlightText !important;
+    border-color: HighlightText !important;
+  }
+  .switch[aria-checked="false"] .switch-knob {
+    background: CanvasText !important;
+    border-color: CanvasText !important;
+  }
+
+  .orb-core, .ring-track, .ring-arc { forced-color-adjust: none; }
+  .dot, .badge-dot { background: CanvasText !important; }
+}
+
+/* ---------- print (diagnostics only, just in case) ---------- */
+@media print {
+  .rail, .toast-host, .banner-host { display: none !important; }
+}
+
+/* ---------- motion pause (window hidden / unfocused) ---------- */
+
+/* Only the continuous loops are paused. Pausing everything froze the
+   one-shot entrance animations too, and a view that was navigated to
+   while the window was in the background stayed at opacity 0 until the
+   window was focused again. The entrance animations below start at
+   .4 rather than 0 for the same reason. */
+body.motion-paused .stage[data-state="idle"] .orb-core,
+body.motion-paused .ambient::before,
+body.motion-paused .ambient::after,
+body.motion-paused .ambient .mesh,
+body.motion-paused .orb-ring .arc,
+body.motion-paused .orb-ring .arc-dash,
+body.motion-paused .chip.tone-busy .dot,
+body.motion-paused .skeleton::after,
+body.motion-paused .spinner {
+  animation-play-state: paused !important;
+}
+
+/* ---------- view transitions ---------- */
+
+/* The rail and the title bar are the window's own chrome. They keep
+   their own transition group, so they stay exactly where they are while
+   the view changes instead of dissolving into it. */
+.rail { view-transition-name: rail; }
+.titlebar { view-transition-name: titlebar; }
+::view-transition-old(rail),
+::view-transition-old(titlebar) { display: none; }
+::view-transition-new(rail),
+::view-transition-new(titlebar) { animation: none; }
+
+/* The content area is what changes, and it changes quietly: the old view
+   fades out where it stands, the new one fades in. Going up the menu, the
+   new view comes in from just above. */
+::view-transition-old(root) { animation: vt-out var(--dur-2) var(--ease-out) both; }
+::view-transition-new(root) { animation: vt-in var(--dur-3) var(--ease-out) both; }
+html[data-nav-direction="back"]::view-transition-new(root) { animation-name: vt-in-back; }
+@keyframes vt-out { to { opacity: 0; } }
+@keyframes vt-in { from { opacity: 0; } }
+@keyframes vt-in-back { from { opacity: 0; transform: translateY(-4px); } }

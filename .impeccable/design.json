@@ -1,0 +1,305 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-22T12:00:00Z",
+  "title": "Design System: Todnet — Ember",
+  "extensions": {
+    "colorMeta": {
+      "ember": {
+        "role": "primary",
+        "displayName": "Ember Orange",
+        "canonical": "oklch(72% 0.18 45)",
+        "tonalRamp": ["oklch(20% 0.07 45)", "oklch(32% 0.12 45)", "oklch(44% 0.16 45)", "oklch(56% 0.18 45)", "oklch(68% 0.19 45)", "oklch(78% 0.16 45)", "oklch(87% 0.10 45)", "oklch(95% 0.05 45)"]
+      },
+      "ember-hover": {
+        "role": "primary",
+        "displayName": "Ember Hover",
+        "canonical": "oklch(76% 0.17 47)",
+        "tonalRamp": ["oklch(24% 0.06 47)", "oklch(36% 0.11 47)", "oklch(48% 0.15 47)", "oklch(60% 0.17 47)", "oklch(72% 0.17 47)", "oklch(82% 0.14 47)", "oklch(90% 0.09 47)", "oklch(96% 0.04 47)"]
+      },
+      "ember-press": {
+        "role": "primary",
+        "displayName": "Ember Press",
+        "canonical": "oklch(68% 0.19 43)",
+        "tonalRamp": ["oklch(18% 0.07 43)", "oklch(30% 0.12 43)", "oklch(42% 0.16 43)", "oklch(54% 0.19 43)", "oklch(66% 0.19 43)", "oklch(77% 0.15 43)", "oklch(88% 0.09 43)", "oklch(95% 0.04 43)"]
+      },
+      "ember-text": {
+        "role": "primary",
+        "displayName": "Ember Text",
+        "canonical": "oklch(78% 0.14 48)",
+        "tonalRamp": ["oklch(22% 0.08 48)", "oklch(34% 0.12 48)", "oklch(46% 0.15 48)", "oklch(58% 0.15 48)", "oklch(70% 0.14 48)", "oklch(78% 0.14 48)", "oklch(88% 0.09 48)", "oklch(95% 0.04 48)"]
+      },
+      "ember-ink": {
+        "role": "primary",
+        "displayName": "Ember Ink",
+        "canonical": "oklch(16% 0.05 45)",
+        "tonalRamp": ["oklch(12% 0.04 45)", "oklch(20% 0.05 45)", "oklch(30% 0.06 45)", "oklch(42% 0.07 45)", "oklch(56% 0.07 45)", "oklch(70% 0.06 45)", "oklch(84% 0.04 45)", "oklch(94% 0.02 45)"]
+      },
+      "ember-soft": {
+        "role": "primary",
+        "displayName": "Ember Wash",
+        "canonical": "rgba(255, 122, 61, 0.14)",
+        "tonalRamp": ["oklch(20% 0.03 45)", "oklch(28% 0.04 45)", "oklch(36% 0.05 45)", "oklch(46% 0.06 45)", "oklch(56% 0.07 45)", "oklch(68% 0.07 45)", "oklch(82% 0.05 45)", "oklch(93% 0.03 45)"]
+      },
+      "ember-line": {
+        "role": "primary",
+        "displayName": "Ember Line",
+        "canonical": "rgba(255, 122, 61, 0.32)",
+        "tonalRamp": ["oklch(20% 0.05 45)", "oklch(30% 0.08 45)", "oklch(40% 0.11 45)", "oklch(52% 0.13 45)", "oklch(64% 0.14 45)", "oklch(76% 0.12 45)", "oklch(86% 0.08 45)", "oklch(94% 0.04 45)"]
+      },
+      "coal": {
+        "role": "neutral",
+        "displayName": "Coal",
+        "canonical": "oklch(13% 0.005 40)",
+        "tonalRamp": ["oklch(10% 0.004 40)", "oklch(15% 0.005 40)", "oklch(21% 0.006 40)", "oklch(30% 0.007 40)", "oklch(44% 0.008 40)", "oklch(60% 0.008 40)", "oklch(78% 0.007 40)", "oklch(93% 0.005 40)"]
+      },
+      "ash-1": {
+        "role": "neutral",
+        "displayName": "Ash 1",
+        "canonical": "oklch(17% 0.007 45)",
+        "tonalRamp": ["oklch(11% 0.005 45)", "oklch(17% 0.007 45)", "oklch(24% 0.008 45)", "oklch(33% 0.009 45)", "oklch(46% 0.010 45)", "oklch(62% 0.010 45)", "oklch(79% 0.009 45)", "oklch(94% 0.006 45)"]
+      },
+      "ash-2": {
+        "role": "neutral",
+        "displayName": "Ash 2",
+        "canonical": "oklch(21% 0.008 45)",
+        "tonalRamp": ["oklch(12% 0.006 45)", "oklch(18% 0.007 45)", "oklch(21% 0.008 45)", "oklch(28% 0.009 45)", "oklch(42% 0.010 45)", "oklch(58% 0.011 45)", "oklch(77% 0.010 45)", "oklch(93% 0.007 45)"]
+      },
+      "ash-3": {
+        "role": "neutral",
+        "displayName": "Ash 3",
+        "canonical": "oklch(26% 0.009 45)",
+        "tonalRamp": ["oklch(13% 0.007 45)", "oklch(19% 0.008 45)", "oklch(26% 0.009 45)", "oklch(34% 0.010 45)", "oklch(47% 0.011 45)", "oklch(63% 0.011 45)", "oklch(80% 0.010 45)", "oklch(94% 0.007 45)"]
+      },
+      "linen": {
+        "role": "neutral",
+        "displayName": "Linen",
+        "canonical": "oklch(95% 0.008 60)",
+        "tonalRamp": ["oklch(20% 0.010 60)", "oklch(33% 0.011 60)", "oklch(46% 0.012 60)", "oklch(58% 0.012 60)", "oklch(70% 0.011 60)", "oklch(81% 0.010 60)", "oklch(90% 0.009 60)", "oklch(97% 0.008 60)"]
+      },
+      "ash-text": {
+        "role": "neutral",
+        "displayName": "Ash Text",
+        "canonical": "oklch(75% 0.012 55)",
+        "tonalRamp": ["oklch(20% 0.012 55)", "oklch(32% 0.013 55)", "oklch(44% 0.013 55)", "oklch(56% 0.013 55)", "oklch(68% 0.012 55)", "oklch(75% 0.012 55)", "oklch(85% 0.010 55)", "oklch(95% 0.009 55)"]
+      },
+      "smoke": {
+        "role": "neutral",
+        "displayName": "Smoke",
+        "canonical": "oklch(64% 0.012 50)",
+        "tonalRamp": ["oklch(18% 0.011 50)", "oklch(28% 0.012 50)", "oklch(38% 0.012 50)", "oklch(48% 0.012 50)", "oklch(58% 0.012 50)", "oklch(64% 0.012 50)", "oklch(78% 0.011 50)", "oklch(92% 0.009 50)"]
+      },
+      "green-signal": {
+        "role": "secondary",
+        "displayName": "Signal Green",
+        "canonical": "oklch(80% 0.16 160)",
+        "tonalRamp": ["oklch(20% 0.07 160)", "oklch(32% 0.10 160)", "oklch(44% 0.13 160)", "oklch(56% 0.15 160)", "oklch(68% 0.16 160)", "oklch(80% 0.16 160)", "oklch(89% 0.11 160)", "oklch(96% 0.05 160)"]
+      },
+      "amber-signal": {
+        "role": "secondary",
+        "displayName": "Signal Amber",
+        "canonical": "oklch(84% 0.13 85)",
+        "tonalRamp": ["oklch(20% 0.05 85)", "oklch(32% 0.08 85)", "oklch(44% 0.10 85)", "oklch(56% 0.12 85)", "oklch(70% 0.13 85)", "oklch(84% 0.13 85)", "oklch(91% 0.09 85)", "oklch(97% 0.04 85)"]
+      },
+      "coral-signal": {
+        "role": "secondary",
+        "displayName": "Signal Coral",
+        "canonical": "oklch(72% 0.15 22)",
+        "tonalRamp": ["oklch(20% 0.07 22)", "oklch(32% 0.11 22)", "oklch(44% 0.14 22)", "oklch(56% 0.15 22)", "oklch(66% 0.15 22)", "oklch(78% 0.12 22)", "oklch(88% 0.08 22)", "oklch(95% 0.04 22)"]
+      },
+      "sky-downlink": {
+        "role": "tertiary",
+        "displayName": "Downlink Sky",
+        "canonical": "oklch(81% 0.11 240)",
+        "tonalRamp": ["oklch(20% 0.05 240)", "oklch(32% 0.08 240)", "oklch(44% 0.10 240)", "oklch(56% 0.11 240)", "oklch(68% 0.11 240)", "oklch(81% 0.11 240)", "oklch(90% 0.08 240)", "oklch(96% 0.03 240)"]
+      },
+      "window-edge": {
+        "role": "neutral",
+        "displayName": "Window Edge",
+        "canonical": "oklch(38% 0.010 50)",
+        "tonalRamp": ["oklch(16% 0.008 50)", "oklch(24% 0.009 50)", "oklch(32% 0.010 50)", "oklch(38% 0.010 50)", "oklch(50% 0.010 50)", "oklch(66% 0.011 50)", "oklch(82% 0.010 50)", "oklch(94% 0.008 50)"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Reserved for a full-width statement; no shipped view uses it yet." },
+      "headline": { "displayName": "Headline", "purpose": "One per view: the view title, or the state word on the connect tile." },
+      "title": { "displayName": "Title", "purpose": "Dialog titles and the allowance figure." },
+      "subtitle": { "displayName": "Subtitle", "purpose": "Wordmark and metric pairs." },
+      "readout": { "displayName": "Readout", "purpose": "The exit IP and other values that are read rather than parsed; shrinks for long addresses." },
+      "body": { "displayName": "Body", "purpose": "Default running text and form values." },
+      "small": { "displayName": "Small", "purpose": "The workhorse: buttons, nav, setting labels, helper text." },
+      "caption": { "displayName": "Caption", "purpose": "Setting descriptions, card labels, chips, log lines, error detail." },
+      "micro": { "displayName": "Micro", "purpose": "Badges, timestamps, the title bar state line, hints." },
+      "mono": { "displayName": "Mono", "purpose": "Machine strings only: IPs, hosts, ports, transports, bypass patterns, logs." }
+    },
+    "themeOverrides": {
+      "light": {
+        "bg": "#FBF7F4",
+        "surface-1": "#FFFFFF",
+        "surface-2": "#F1E7DF",
+        "surface-3": "#EEE4DD",
+        "border": "rgba(40, 20, 10, 0.10)",
+        "border-strong": "rgba(40, 20, 10, 0.48)",
+        "text": "#1E1612",
+        "text-2": "#5C4D46",
+        "text-3": "#6F6058",
+        "accent": "#FF7A3D",
+        "accent-text": "#B23A05",
+        "accent-strong": "#B23A05",
+        "chart-down": "#1C63A8",
+        "ok": "#0E7043",
+        "warn": "#8A5A00",
+        "danger": "#B3261E",
+        "window-border": "#C9B4A6",
+        "focus-ring": "#1E1612",
+        "focus-halo": "#FFFFFF"
+      }
+    },
+    "shadows": [
+      { "name": "ambient", "value": "0 1px 2px rgba(0, 0, 0, .35), 0 8px 24px rgba(0, 0, 0, .22)", "purpose": "A card at rest: contact shadow plus a wide, low pool. Felt, not seen." },
+      { "name": "floating", "value": "0 10px 30px rgba(0, 0, 0, .38), 0 2px 8px rgba(0, 0, 0, .30)", "purpose": "Popovers, toasts, banners, tooltips — anything detached from the flow." },
+      { "name": "modal", "value": "0 30px 80px rgba(0, 0, 0, .55), 0 8px 24px rgba(0, 0, 0, .35)", "purpose": "The dialog stack only." },
+      { "name": "inner-top", "value": "inset 0 1px 0 rgba(255, 255, 255, .05)", "purpose": "1 px top highlight on every raised surface in the dark theme; white inner line in the light theme." },
+      { "name": "orb-halo", "value": "0 0 44px rgba(255, 122, 61, .30), 0 24px 70px rgba(0, 0, 0, .45)", "purpose": "The connected orb's halo: light pooled on the surface behind the core." },
+      { "name": "primary-underlight", "value": "0 1px 0 rgba(255, 255, 255, .18) inset, 0 6px 18px rgba(255, 122, 61, .10)", "purpose": "The primary button's inner top edge and soft orange under-glow." }
+    ],
+    "motion": [
+      { "name": "dur-1", "value": "80ms", "purpose": "Press travel, icon colour change." },
+      { "name": "dur-2", "value": "140ms", "purpose": "Hover and border transitions." },
+      { "name": "dur-3", "value": "220ms", "purpose": "View change, toast/banner entrance, focus ring settle." },
+      { "name": "dur-4", "value": "360ms", "purpose": "Modal entrance, disclosure and advanced-section expansion, nav pill slide." },
+      { "name": "dur-5", "value": "700ms", "purpose": "Orb settle, ring sweep, ambient state fade." },
+      { "name": "ease-out", "value": "cubic-bezier(.22, 1, .36, 1)", "purpose": "Default for anything entering or leaving." },
+      { "name": "ease-in-out", "value": "cubic-bezier(.65, 0, .35, 1)", "purpose": "Continuous loops: orb breathe, arc spin, dot pulse." },
+      { "name": "ease-spring", "value": "linear(0, .25 8%, .62 18%, .94 30%, 1.06 42%, 1.04 54%, .99 70%, 1)", "purpose": "Nav pill, switch knob, segmented thumb, toast and modal entrance — nothing at rest." },
+      { "name": "theme-reveal", "value": "420ms", "purpose": "Circular clip-path reveal from the control that changed the theme." }
+    ],
+    "breakpoints": [
+      { "name": "rail-compact", "value": "859px" },
+      { "name": "window-min", "value": "760px" },
+      { "name": "app-default", "value": "1000px" },
+      { "name": "content-max", "value": "1120px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one action the screen exists for: orange fill, ink text, inner top edge and soft under-glow.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Connect</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;padding:0 14px;border:1px solid transparent;border-radius:10px;background:var(--accent,#FF7A3D);color:var(--accent-ink,#1A0C05);font-family:var(--font,\"Segoe UI\",system-ui,sans-serif);font-size:13px;font-weight:600;line-height:1;cursor:pointer;box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 6px 18px rgba(255,122,61,.10);transition:background-color 140ms cubic-bezier(.22,1,.36,1),transform 80ms cubic-bezier(.22,1,.36,1),box-shadow 140ms cubic-bezier(.22,1,.36,1)}.ds-btn-primary:hover{background:var(--accent-hover,#FF8A52)}.ds-btn-primary:active{background:var(--accent-press,#F06A2C);transform:translateY(1px)}.ds-btn-primary:focus-visible{outline:2px solid var(--text,#F5EFEB);outline-offset:2px;box-shadow:0 0 0 4px #000,0 1px 0 rgba(255,255,255,.18) inset,0 6px 18px rgba(255,122,61,.10)}.ds-btn-primary[disabled]{opacity:.45;cursor:default}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "The default for every action that is not the screen's purpose: ash fill, hairline edge, linen text.",
+      "html": "<button class=\"ds-btn-secondary\" type=\"button\">Cancel</button>",
+      "css": ".ds-btn-secondary{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;padding:0 14px;border:1px solid rgba(255,255,255,.07);border-radius:10px;background:var(--surface-2,#1E1A17);color:var(--text,#F5EFEB);font-family:var(--font,\"Segoe UI\",system-ui,sans-serif);font-size:13px;font-weight:600;line-height:1;cursor:pointer;transition:background-color 140ms cubic-bezier(.22,1,.36,1),border-color 140ms cubic-bezier(.22,1,.36,1),transform 80ms cubic-bezier(.22,1,.36,1)}.ds-btn-secondary:hover{background:var(--surface-3,#272220);border-color:rgba(255,255,255,.34)}.ds-btn-secondary:active{transform:translateY(1px)}.ds-btn-secondary:focus-visible{outline:2px solid var(--text,#F5EFEB);outline-offset:2px;box-shadow:0 0 0 4px #000}"
+    },
+    {
+      "name": "Switch",
+      "kind": "input",
+      "refersTo": "switch-track-on",
+      "description": "A real role=switch button. White knob with a dark ink edge so the knob reads on the orange track; the knob stretches while held.",
+      "html": "<button class=\"ds-switch\" type=\"button\" role=\"switch\" aria-checked=\"true\" aria-label=\"Verify exit IP\"><span class=\"ds-switch-knob\" aria-hidden=\"true\"></span></button>",
+      "css": ".ds-switch{position:relative;flex:0 0 auto;width:44px;height:24px;padding:0;border:1px solid rgba(255,255,255,.34);border-radius:999px;background:var(--surface-3,#272220);cursor:pointer;transition:background-color 140ms cubic-bezier(.22,1,.36,1),border-color 140ms cubic-bezier(.22,1,.36,1)}.ds-switch:hover{border-color:var(--text-3,#978A83)}.ds-switch[aria-checked=\"true\"]{background:var(--accent,#FF7A3D);border-color:transparent}.ds-switch-knob{position:absolute;top:3px;inset-inline-start:3px;width:16px;height:16px;border-radius:50%;background:#fff;border:1px solid #1A0C05;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:inset-inline-start 220ms var(--ease-spring,cubic-bezier(.22,1,.36,1)),width 80ms,height 80ms,top 80ms}.ds-switch[aria-checked=\"true\"] .ds-switch-knob{inset-inline-start:23px}.ds-switch:active .ds-switch-knob{width:19px;height:18px;top:2px}.ds-switch:active[aria-checked=\"true\"] .ds-switch-knob{inset-inline-start:20px}.ds-switch:focus-visible{outline:2px solid var(--text,#F5EFEB);outline-offset:2px;box-shadow:0 0 0 4px #000}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Ash fill with a deliberately visible 3:1 edge; focus turns the edge orange and lifts the fill.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Bypass domain</span><input class=\"ds-input\" type=\"text\" value=\"*.example.com\" placeholder=\"example.com\"></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:6px;font-family:var(--font,\"Segoe UI\",system-ui,sans-serif)}.ds-field-label{font-size:12px;line-height:16px;font-weight:600;color:var(--text-2,#B8ABA3)}.ds-input{height:38px;width:100%;padding-inline:12px;border:1px solid rgba(255,255,255,.34);border-radius:10px;background:var(--surface-2,#1E1A17);color:var(--text,#F5EFEB);font-family:inherit;font-size:13px;outline:none;transition:border-color 140ms cubic-bezier(.22,1,.36,1),box-shadow 140ms cubic-bezier(.22,1,.36,1),background-color 140ms cubic-bezier(.22,1,.36,1)}.ds-input::placeholder{color:var(--text-3,#978A83)}.ds-input:hover{border-color:var(--text-3,#978A83)}.ds-input:focus{border-color:var(--accent,#FF7A3D);box-shadow:0 0 0 3px rgba(255,122,61,.14);background:var(--surface-1,#161311)}"
+    },
+    {
+      "name": "Status Chip",
+      "kind": "chip",
+      "refersTo": "chip-ok",
+      "description": "State at chip weight: the label carries the tone, the ringed dot carries the transition.",
+      "html": "<span class=\"ds-chip ds-chip-ok\"><span class=\"ds-chip-dot\" aria-hidden=\"true\"></span>Connected</span>",
+      "css": ".ds-chip{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:26px;padding-inline:10px;border:1px solid rgba(255,255,255,.34);border-radius:999px;background:rgba(61,220,151,.12);color:var(--ok,#3DDC97);font-family:var(--font,\"Segoe UI\",system-ui,sans-serif);font-size:12px;font-weight:600;line-height:1;white-space:nowrap}.ds-chip-dot{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px rgba(61,220,151,.12)}"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Dashboard card: ash surface, hairline border, ambient shadow, uppercase label and a mono value.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-head\"><span class=\"ds-card-label\">Exit IP</span></div><div class=\"ds-card-value\">185.152.65.42</div><div class=\"ds-card-meta\">Netherlands · Verified in 0.4 s</div></div>",
+      "css": ".ds-card{width:100%;max-width:420px;padding:16px;border:1px solid rgba(255,255,255,.07);border-radius:14px;background:var(--surface-1,#161311);box-shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.05);font-family:var(--font,\"Segoe UI\",system-ui,sans-serif);overflow:hidden}.ds-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.ds-card-label{font-size:12px;line-height:16px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3,#978A83)}.ds-card-value{font-family:var(--font-mono,\"Cascadia Mono\",Consolas,ui-monospace,monospace);font-size:15px;line-height:22px;font-weight:600;letter-spacing:-.02em;color:var(--text,#F5EFEB);font-variant-numeric:tabular-nums}.ds-card-meta{margin-top:6px;font-size:12px;line-height:16px;color:var(--text-2,#B8ABA3)}"
+    },
+    {
+      "name": "Nav Item (active)",
+      "kind": "nav",
+      "refersTo": "nav-item-active",
+      "description": "Rail destination: 40 px row, 20 px icon, pill of Ember Wash with a readable orange border behind the active item.",
+      "html": "<button class=\"ds-nav-item is-active\" type=\"button\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 10.4 12 4l8 6.4V19a1 1 0 0 1-1 1h-4.6v-5.4H9.6V20H5a1 1 0 0 1-1-1v-8.6Z\"/></svg><span>Home</span></button>",
+      "css": ".ds-nav-item{display:flex;align-items:center;gap:12px;width:100%;height:40px;padding-inline:11px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--text-2,#B8ABA3);font-family:var(--font,\"Segoe UI\",system-ui,sans-serif);font-size:13px;font-weight:600;text-align:start;cursor:pointer;transition:color 140ms,background-color 140ms,border-color 140ms}.ds-nav-item:hover{color:var(--text,#F5EFEB);background:var(--surface-2,#1E1A17)}.ds-nav-item.is-active{color:var(--accent-text,#FF9A66);background:rgba(255,122,61,.14);border-color:var(--accent-strong,#FF7A3D)}.ds-nav-item.is-active:hover{background:rgba(255,122,61,.14)}.ds-nav-item:focus-visible{outline:2px solid var(--text,#F5EFEB);outline-offset:2px;box-shadow:0 0 0 4px #000}.ds-nav-item svg{flex:0 0 auto}"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "custom",
+      "description": "Transport and mode picker: a thin-bordered trough with a white thumb that springs to the pressed option.",
+      "html": "<div class=\"ds-seg\" role=\"group\" aria-label=\"Transport\"><span class=\"ds-seg-thumb\" aria-hidden=\"true\"></span><button type=\"button\" aria-pressed=\"true\">Auto</button><button type=\"button\" aria-pressed=\"false\">HTTP/2</button><button type=\"button\" aria-pressed=\"false\">HTTP/3</button></div>",
+      "css": ".ds-seg{position:relative;display:inline-flex;padding:3px;gap:2px;border:1px solid rgba(255,255,255,.34);border-radius:10px;background:var(--surface-2,#1E1A17);font-family:var(--font,\"Segoe UI\",system-ui,sans-serif)}.ds-seg-thumb{position:absolute;top:3px;bottom:3px;inset-inline-start:3px;width:52px;border-radius:6px;background:var(--surface-1,#161311);border:1px solid rgba(255,255,255,.34);box-shadow:0 1px 3px rgba(0,0,0,.18);pointer-events:none;transition:inset-inline-start 220ms var(--ease-spring,cubic-bezier(.22,1,.36,1)),width 220ms var(--ease-spring,cubic-bezier(.22,1,.36,1))}.ds-seg button{position:relative;z-index:1;height:26px;padding-inline:12px;border:0;border-radius:6px;background:transparent;color:var(--text-2,#B8ABA3);font:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:color 140ms}.ds-seg button:hover{color:var(--text,#F5EFEB)}.ds-seg button[aria-pressed=\"true\"]{color:var(--text,#F5EFEB)}.ds-seg button:focus-visible{outline:2px solid var(--text,#F5EFEB);outline-offset:2px}"
+    },
+    {
+      "name": "Connected Orb (signature)",
+      "kind": "custom",
+      "description": "The connect tile's core: graphite lit from within, orange rim, halo behind it. Never a solid orange disc.",
+      "html": "<div class=\"ds-orb\"><span class=\"ds-orb-halo\" aria-hidden=\"true\"></span><span class=\"ds-orb-ring\" aria-hidden=\"true\"></span><span class=\"ds-orb-core\"><svg width=\"46\" height=\"46\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.9\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 2.8 20 6v6.2c0 4.5-3.2 7.6-8 9-4.8-1.4-8-4.5-8-9V6l8-3.2Z\"/><path d=\"M8.3 12.1l2.6 2.6 4.9-5.1\" stroke-linecap=\"round\"/></svg></span></div>",
+      "css": ".ds-orb{position:relative;width:232px;height:232px;display:grid;place-items:center;cursor:pointer}.ds-orb-halo{position:absolute;inset:2%;border-radius:50%;background:radial-gradient(circle,rgba(255,122,61,.30) 0%,transparent 62%);filter:blur(22px)}.ds-orb-ring{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(255,122,61,.5)}.ds-orb-core{position:relative;display:grid;place-items:center;width:150px;height:150px;border-radius:50%;background:radial-gradient(120% 120% at 34% 16%,rgba(255,154,102,.30) 0%,rgba(255,122,61,.10) 38%,transparent 68%),radial-gradient(120% 120% at 50% 120%,rgba(255,122,61,.16) 0%,transparent 60%),var(--surface-1,#161311);border:1px solid rgba(255,122,61,.55);color:var(--accent,#FF7A3D);box-shadow:0 0 0 1px rgba(255,122,61,.18) inset,0 0 44px rgba(255,122,61,.30),0 24px 70px rgba(0,0,0,.45);transition:transform 220ms cubic-bezier(.22,1,.36,1),box-shadow 700ms cubic-bezier(.22,1,.36,1)}.ds-orb-core svg{filter:drop-shadow(0 0 10px rgba(255,122,61,.55))}.ds-orb:hover .ds-orb-core{transform:scale(.985)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Ember",
+    "overview": "Ember is a dark-first Windows instrument with a warm graphite body and a single orange source that behaves like light. The default surface is coal; the panels above it are warm ash, not neutral grey, so the whole window sits in the same temperature as the fox-orange accent. Orange is almost absent when the tunnel is down and is the only light in the room when it is up: a glowing rim on the orb, a gradient arc on the allowance ring, a 2 px selected edge, one filled button.\n\nThe character is warm precision: a calm, dense, native Windows control panel that measures its contrast instead of trusting its eye, prefers a plain number to a reassuring sentence, and gives state its own vocabulary (idle, busy, ok, error) so the same four words mean the same thing in the title bar, the chip, the orb and the live region. Density is high — 13–14 px body text, 32–44 px controls, rows padded 13 px — because the person reading it is looking at a tunnel, not browsing a catalogue.\n\nThe material story is light in a dark room. Connected, the orb is graphite lit from within — a warm core, a bright rim, a halo on the surface behind it — rather than a solid orange disc. Green is scoped to the chip and never becomes the headline. Motion is tactile and quiet: 1 px press travel, a spring on the nav pill and the switch knob, a 360 ms spring only when a dialog actually arrives.",
+    "keyCharacteristics": [
+      "Dark by default, with a light theme that is the same structure on warm paper — every component reads the same token names.",
+      "One accent, used as emitted light: rim, arc, glow, chip text, selected border, and exactly one primary button per screen.",
+      "Four warm surfaces in strict tonal steps; shadows only for things that float.",
+      "A 40 px drawn title bar and a 208 px rail that behave like Windows chrome, not like a website.",
+      "Native-density type: 11–14 px working text, four weights (400 body, 500 tooltip, 600 interface, 700 wordmark and counts), tabular numbers everywhere a value changes.",
+      "Full right-to-left layout for Persian, written with logical properties, with Latin values isolated.",
+      "Contrast measured against every surface a token can land on, in both themes, before the value ships."
+    ],
+    "rules": [
+      { "name": "The Orange Is Light Rule", "body": "Orange marks emitted state and selection. It may fill a button, a 2 px border, an arc, a dot, a glow, or a few words of text. It may never fill a card, a panel, a header, a row background at full strength, or more than roughly a tenth of any screen. If a screen looks orange, the screen is wrong.", "section": "colors" },
+      { "name": "The Closed Palette Rule", "body": "Every colour in the interface resolves to a token in web/css/tokens.css. A literal hex outside that file is a bug, and the two themes are two value sets behind one set of names, so no component knows which is active.", "section": "colors" },
+      { "name": "The Measured Contrast Rule", "body": "A token ships only after its ratio is computed against every surface it can appear on, in both themes. Text is ≥ 4.5:1; the edge of a text field and a selected-state border are ≥ 3:1. Where the maths cannot reach the bar with a tint, the design changes shape.", "section": "colors" },
+      { "name": "The Four Weights Rule", "body": "400 carries body and running text, 600 carries the interface (buttons, labels, titles, numbers), 700 belongs to the wordmark, avatars, log levels and account tiers, and 500 exists only for tooltip text. There is no light weight and no italic.", "section": "typography" },
+      { "name": "The Tabular Rule", "body": "Any number that can change while the window is open — a rate, a total, a countdown, an allowance, a port, an ID — is set in tabular numerals. Digits must not reflow the line on every poll.", "section": "typography" },
+      { "name": "The Mono Means Machine Rule", "body": "The mono face is a signal that the string is copied, pasted, compared or logged. A sentence is never mono; an IP, a hostname, a port, a transport or a log line always is.", "section": "typography" },
+      { "name": "The Logical Properties Rule", "body": "Layout is written in inline-start / inline-end / margin-inline / padding-inline throughout; the same CSS must produce the English and the Persian screen. Physical directions live only in web/css/direction.css.", "section": "layout" },
+      { "name": "The Chrome Stays Still Rule", "body": "The title bar and the rail are the window, not the page. They keep their own view-transition group and no animation, while only the content area fades or slides.", "section": "layout" },
+      { "name": "The Tonal-First Rule", "body": "If a surface needs separating from its neighbour, step the surface colour or add a border. A shadow means the element floats, so a shadow on a row, a group, a setting or a header is a mistake, not a style choice.", "section": "elevation" },
+      { "name": "The Lit-Not-Painted Rule", "body": "The connected orb is a graphite core lit from inside — warm radial highlight, orange rim, halo behind it. Never swap it for a solid orange disc: at this size that reads as an alarm.", "section": "elevation" },
+      { "name": "The One Radius Rule", "body": "A shape has one radius. If a card is 14 px, its inner row is not also 14 px — it is either flush, or a 6–10 px control sitting inside it.", "section": "shapes" },
+      { "name": "The Drawn-Mark Rule", "body": "The brand mark, the icon sprite and the window buttons are drawn in the same hand: 24 px grid, 1.75 stroke, round caps and joins, currentColor. Default Windows glyphs next to these make the chrome look like a browser window.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do put one orange action on a screen and let every other action be secondary, ghost or a link.",
+      "Do let state live in the chip, the dot and the orb, and keep the headline Linen unless the state is an error.",
+      "Do use the surface ladder (Coal → Ash 1 → Ash 2 → Ash 3) and 1 px borders to build hierarchy before reaching for a shadow.",
+      "Do set every changing number in tabular figures, and every machine string in mono with dir=\"ltr\".",
+      "Do build controls from ui.js so they arrive with a role, a state, a name and a keyboard path.",
+      "Do verify contrast for both themes on the actual surface the element sits on — including the light theme's darker accent-text and success values.",
+      "Do write layout in logical properties and keep physical-direction exceptions in direction.css.",
+      "Do give Persian the same layout, not a narrower one: test the minimum window in both directions, since Persian labels are longer in places and shorter in others.",
+      "Do keep the title bar's order fixed — mark leading, window buttons trailing — in every language."
+    ],
+    "donts": [
+      "Don't add a colour outside tokens.css, and don't add a value that only works in one theme.",
+      "Don't fill a card, panel, header or row background with full-strength orange, or let a screen read as orange overall.",
+      "Don't use a drop shadow on list rows, groups, settings rows or headers; those separate by tone and border.",
+      "Don't turn the connected orb into a solid orange disc, a 100 % progress bar, or a green success badge — the arc fades back to a quiet status ring for a reason.",
+      "Don't paint the connected headline green, or let green compete with the orange core.",
+      "Don't use 500, italics, or a second typeface to create hierarchy; size, weight and colour do that work.",
+      "Don't hide an affordance until hover — the copy button, the remove button and the favourite star stay visible or reachable by focus.",
+      "Don't place a banner over the content it is warning about; it belongs in the flow.",
+      "Don't animate continuously when nothing is happening, and never start an entrance from opacity: 0 on a view that may mount while the window is hidden.",
+      "Don't use Windows' default caption glyphs in the title bar; they are a different drawing system from the sprite."
+    ]
+  }
+}
