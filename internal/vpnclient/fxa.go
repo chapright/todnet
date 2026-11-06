@@ -91,7 +91,12 @@ func newFxaAPIError(status int, body []byte) *fxaAPIError {
 }
 
 func deriveAuthPW(email, password string) ([]byte, error) {
-	salt := []byte(protocolVersion + "quickStretch:" + email)
+	// FxA derives the salt from the canonical (lower-cased, trimmed) address.
+	// Using the address as typed means "User@Example.com" derives a different
+	// authPW from the one the server expects for that account, and a correct
+	// password is rejected as incorrect.
+	normalizedEmail := strings.ToLower(strings.TrimSpace(email))
+	salt := []byte(protocolVersion + "quickStretch:" + normalizedEmail)
 	quickStretchedPW := pbkdf2.Key([]byte(password), salt, pbkdf2Rounds, stretchedPWLen, sha256.New)
 
 	hkdfSalt := []byte{0x00}
@@ -177,6 +182,11 @@ func hawkHeader(method, rawURL, hawkID string, hawkKey []byte, payload string) (
 // the Fastly anti-bot client challenge when the edge answers HTTP 406 (empty
 // body, no FxA error payload). The request factory is invoked again after
 // each successful solve because request bodies are single-use readers.
+//
+// Every attempt is written to signin-debug.log (Debugf) with the method,
+// host+path, User-Agent, auth presence and the response status/headers, so
+// an "anti-bot check could not be completed" report can be diagnosed
+// without the password or tokens.
 func fxaDo(ctx context.Context, newRequest func() (*http.Request, error)) (*http.Response, error) {
 	ctx, cancel := contextWithMinDeadline(ctx, fxaCallMinBudget)
 	defer cancel()
@@ -184,22 +194,38 @@ func fxaDo(ctx context.Context, newRequest func() (*http.Request, error)) (*http
 	for attempt := 1; attempt <= maxChallengeAttempts; attempt++ {
 		req, err := newRequest()
 		if err != nil {
+			Debugf("[fxa] attempt %d/%d newRequest failed: %v", attempt, maxChallengeAttempts, err)
 			return nil, err
 		}
+		host := ""
+		path := ""
+		if req.URL != nil {
+			host = req.URL.Host
+			path = req.URL.Path
+		}
+		Debugf("[fxa] attempt %d/%d %s %s%s %s", attempt, maxChallengeAttempts, req.Method, host, path, SummarizeRequestHeaders(req.Header))
+		started := time.Now()
 		resp, err := doControlPlane(req)
+		elapsed := time.Since(started).Round(time.Millisecond)
 		if err != nil {
+			Debugf("[fxa] attempt %d/%d %s %s%s transport error after %s: %v", attempt, maxChallengeAttempts, req.Method, host, path, elapsed, err)
 			return nil, err
 		}
+		Debugf("[fxa] attempt %d/%d %s %s%s -> %d %s in %s", attempt, maxChallengeAttempts, req.Method, host, path, resp.StatusCode, SummarizeResponseHeaders(resp.Header), elapsed)
 		if resp.StatusCode != http.StatusNotAcceptable {
 			return resp, nil
 		}
 		io.Copy(io.Discard, io.LimitReader(resp.Body, 4096))
 		resp.Body.Close()
 
+		Debugf("[fxa] attempt %d/%d got 406, solving Fastly challenge", attempt, maxChallengeAttempts)
 		if err := solveFastlyChallenge(ctx); err != nil {
+			Debugf("[fxa] attempt %d/%d challenge solve failed: %v", attempt, maxChallengeAttempts, err)
 			return nil, fmt.Errorf("Fastly anti-bot challenge: %w", err)
 		}
+		Debugf("[fxa] attempt %d/%d challenge solved, retrying", attempt, maxChallengeAttempts)
 	}
+	Debugf("[fxa] still failing after %d attempts (HTTP 406)", maxChallengeAttempts)
 	return nil, fmt.Errorf("Fastly anti-bot challenge still failing after %d attempts (HTTP 406)", maxChallengeAttempts)
 }
 
@@ -216,10 +242,13 @@ func fxaLogin(ctx context.Context, email, password string) (*LoginResponse, erro
 }
 
 func fxaLoginAttempt(ctx context.Context, email, password, verificationMethod string) (*LoginResponse, error) {
+	Debugf("[fxa] login start email=%q verificationMethod=%q", email, verificationMethod)
 	authPW, err := deriveAuthPW(email, password)
 	if err != nil {
+		Debugf("[fxa] login deriveAuthPW failed: %v", err)
 		return nil, fmt.Errorf("deriving authPW: %w", err)
 	}
+	Debugf("[fxa] login authPW derived bytes=%d hexLen=%d (password and authPW never logged)", len(authPW), len(hex.EncodeToString(authPW)))
 
 	body := map[string]string{
 		"email":  email,
@@ -238,23 +267,28 @@ func fxaLoginAttempt(ctx context.Context, email, password, verificationMethod st
 			return nil, fmt.Errorf("creating login request: %w", err)
 		}
 		req.Header.Set("Content-Type", "application/json")
-		applyMozillaVPNHeaders(req)
+		applyFxaHeaders(req)
 		return req, nil
 	})
 	if err != nil {
+		Debugf("[fxa] login request failed: %v", err)
 		return nil, fmt.Errorf("login request: %w", err)
 	}
 	defer resp.Body.Close()
 
 	data, _ := io.ReadAll(resp.Body)
+	Debugf("[fxa] login response status=%d bodyLen=%d %s", resp.StatusCode, len(data), SummarizeResponseHeaders(resp.Header))
 	if resp.StatusCode != http.StatusOK {
+		Debugf("[fxa] login error body=%s", truncate(string(data), 1024))
 		return nil, newFxaAPIError(resp.StatusCode, data)
 	}
 
 	var loginResp LoginResponse
 	if err := json.Unmarshal(data, &loginResp); err != nil {
+		Debugf("[fxa] login parsing response failed: %v bodyLen=%d", err, len(data))
 		return nil, fmt.Errorf("parsing login response: %w", err)
 	}
+	Debugf("[fxa] login ok verified=%v method=%q reason=%q sessionTokenPresent=%v sessionTokenLen=%d uidPresent=%v", loginResp.Verified, loginResp.VerificationMethod, loginResp.VerificationReason, loginResp.SessionToken != "", len(loginResp.SessionToken), loginResp.UID != "")
 	return &loginResp, nil
 }
 
@@ -262,10 +296,13 @@ func fxaLoginAttempt(ctx context.Context, email, password, verificationMethod st
 // session created by fxaLogin; FxA sends the code to the account email at
 // login time.
 func fxaVerifySession(ctx context.Context, sessionToken, code string) error {
+	Debugf("[fxa] verify start sessionTokenLen=%d codeLen=%d (values never logged)", len(sessionToken), len(code))
 	hawkID, hawkKey, err := deriveHawkCredentials(sessionToken, "sessionToken")
 	if err != nil {
+		Debugf("[fxa] verify deriveHawk failed: %v", err)
 		return fmt.Errorf("deriving hawk credentials: %w", err)
 	}
+	Debugf("[fxa] verify hawk idLen=%d keyLen=%d", len(hawkID), len(hawkKey))
 
 	body := map[string]string{"code": code}
 	bodyJSON, _ := json.Marshal(body)
@@ -282,26 +319,33 @@ func fxaVerifySession(ctx context.Context, sessionToken, code string) error {
 		}
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Authorization", authHeader)
-		applyMozillaVPNHeaders(req)
+		applyFxaHeaders(req)
 		return req, nil
 	})
 	if err != nil {
+		Debugf("[fxa] verify request failed: %v", err)
 		return fmt.Errorf("verify code request: %w", err)
 	}
 	defer resp.Body.Close()
 
 	data, _ := io.ReadAll(resp.Body)
+	Debugf("[fxa] verify response status=%d bodyLen=%d %s", resp.StatusCode, len(data), SummarizeResponseHeaders(resp.Header))
 	if resp.StatusCode != http.StatusOK {
+		Debugf("[fxa] verify error body=%s", truncate(string(data), 1024))
 		return fmt.Errorf("verification failed (HTTP %d): %s", resp.StatusCode, truncate(string(data), 256))
 	}
+	Debugf("[fxa] verify ok")
 	return nil
 }
 
 func fxaOAuthToken(ctx context.Context, sessionToken string) (*TokenResponse, error) {
+	Debugf("[fxa] oauth start grant=fxa-credentials client_id=%s scope=%q sessionTokenLen=%d", firefoxClientID, oauthScope, len(sessionToken))
 	hawkID, hawkKey, err := deriveHawkCredentials(sessionToken, "sessionToken")
 	if err != nil {
+		Debugf("[fxa] oauth deriveHawk failed: %v", err)
 		return nil, fmt.Errorf("deriving hawk credentials: %w", err)
 	}
+	Debugf("[fxa] oauth hawk idLen=%d keyLen=%d (key never logged)", len(hawkID), len(hawkKey))
 
 	body := map[string]interface{}{
 		"client_id":   firefoxClientID,
@@ -313,41 +357,68 @@ func fxaOAuthToken(ctx context.Context, sessionToken string) (*TokenResponse, er
 
 	tokenURL := fxaAuthServer + "/oauth/token"
 
+	authHeader, err := hawkHeader("POST", tokenURL, hawkID, hawkKey, string(bodyJSON))
+	if err != nil {
+		Debugf("[fxa] oauth hawk failed: %v", err)
+		return nil, fmt.Errorf("generating hawk header: %w", err)
+	}
+	// Go TLS is rejected by the edge for the lowercase VPN scope on this
+	// endpoint (406 even with a solved cookie). curl.exe (Schannel) for the
+	// same request reaches the origin (401 for a fake Hawk proves it —
+	// the edge no longer blocks). Keep this on the Schannel path: only a
+	// 406 from curl (edge still blocks even Schannel) or a transport
+	// failure falls back to Go/challenge-solving. A 4xx from curl with a
+	// JSON body (e.g. 401 errno 110 for a bad Hawk) is the origin's
+	// definitive answer and must not be retried over Go, which would
+	// only turn it into a misleading 406.
+	if tok, status, _, err := doOAuthViaCurl(ctx, tokenURL, bodyJSON, authHeader); err == nil {
+		Debugf("[fxa] oauth ok via curl status=%d accessTokenPresent=%v len=%d refreshPresent=%v len=%d expiresIn=%d scope=%q type=%q", status, tok.AccessToken != "", len(tok.AccessToken), tok.RefreshToken != "", len(tok.RefreshToken), tok.ExpiresIn, tok.Scope, tok.TokenType)
+		return tok, nil
+	} else if status != 0 && status != 406 {
+		Debugf("[fxa] oauth via curl origin answered %d, not retrying over Go: %v", status, err)
+		return nil, fmt.Errorf("oauth token request: %w", err)
+	} else {
+		Debugf("[fxa] oauth via curl failed (%v), falling back to Go challenge path", err)
+	}
 	resp, err := fxaDo(ctx, func() (*http.Request, error) {
-		authHeader, err := hawkHeader("POST", tokenURL, hawkID, hawkKey, string(bodyJSON))
-		if err != nil {
-			return nil, fmt.Errorf("generating hawk header: %w", err)
-		}
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, tokenURL, strings.NewReader(string(bodyJSON)))
 		if err != nil {
 			return nil, fmt.Errorf("creating oauth token request: %w", err)
 		}
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Authorization", authHeader)
-		applyMozillaVPNHeaders(req)
+		applyFxaHeaders(req)
 		return req, nil
 	})
 	if err != nil {
+		Debugf("[fxa] oauth request failed: %v", err)
 		return nil, fmt.Errorf("oauth token request: %w", err)
 	}
 	defer resp.Body.Close()
 
+	Debugf("[fxa] oauth response status=%d %s", resp.StatusCode, SummarizeResponseHeaders(resp.Header))
 	if resp.StatusCode != http.StatusOK {
-		return nil, newFxaAPIError(resp.StatusCode, []byte(readErrorBody(resp.Body)))
+		body := readErrorBody(resp.Body)
+		Debugf("[fxa] oauth error body=%s", truncate(body, 1024))
+		return nil, newFxaAPIError(resp.StatusCode, []byte(body))
 	}
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
+		Debugf("[fxa] oauth reading response failed: %v", err)
 		return nil, fmt.Errorf("reading token response: %w", err)
 	}
 
 	var tok TokenResponse
 	if err := json.Unmarshal(data, &tok); err != nil {
+		Debugf("[fxa] oauth parsing response failed: %v bodyLen=%d", err, len(data))
 		return nil, fmt.Errorf("parsing token response: %w", err)
 	}
+	Debugf("[fxa] oauth ok accessTokenPresent=%v len=%d refreshPresent=%v len=%d expiresIn=%d scope=%q type=%q", tok.AccessToken != "", len(tok.AccessToken), tok.RefreshToken != "", len(tok.RefreshToken), tok.ExpiresIn, tok.Scope, tok.TokenType)
 	return &tok, nil
 }
 
 func fxaRefreshToken(ctx context.Context, refreshToken string) (*TokenResponse, error) {
+	Debugf("[fxa] refresh start grant=refresh_token client_id=%s scope=%q refreshTokenLen=%d", firefoxClientID, oauthScope, len(refreshToken))
 	body := map[string]interface{}{
 		"client_id":     firefoxClientID,
 		"grant_type":    "refresh_token",
@@ -358,30 +429,48 @@ func fxaRefreshToken(ctx context.Context, refreshToken string) (*TokenResponse, 
 
 	tokenURL := fxaAuthServer + "/oauth/token"
 
+	if tok, status, _, err := doOAuthViaCurl(ctx, tokenURL, bodyJSON, ""); err == nil {
+		Debugf("[fxa] refresh ok via curl status=%d accessLen=%d refreshLen=%d expiresIn=%d scope=%q", status, len(tok.AccessToken), len(tok.RefreshToken), tok.ExpiresIn, tok.Scope)
+		if tok.RefreshToken == "" {
+			tok.RefreshToken = refreshToken
+		}
+		return tok, nil
+	} else if status != 0 && status != 406 {
+		Debugf("[fxa] refresh via curl origin answered %d, not retrying over Go: %v", status, err)
+		return nil, fmt.Errorf("refresh request: %w", err)
+	} else {
+		Debugf("[fxa] refresh via curl failed (%v), falling back to Go challenge path", err)
+	}
 	resp, err := fxaDo(ctx, func() (*http.Request, error) {
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, tokenURL, strings.NewReader(string(bodyJSON)))
 		if err != nil {
 			return nil, fmt.Errorf("creating refresh request: %w", err)
 		}
 		req.Header.Set("Content-Type", "application/json")
-		applyMozillaVPNHeaders(req)
+		applyFxaHeaders(req)
 		return req, nil
 	})
 	if err != nil {
+		Debugf("[fxa] refresh request failed: %v", err)
 		return nil, fmt.Errorf("refresh request: %w", err)
 	}
 	defer resp.Body.Close()
 
+	Debugf("[fxa] refresh response status=%d %s", resp.StatusCode, SummarizeResponseHeaders(resp.Header))
 	if resp.StatusCode != http.StatusOK {
-		return nil, newFxaAPIError(resp.StatusCode, []byte(readErrorBody(resp.Body)))
+		body := readErrorBody(resp.Body)
+		Debugf("[fxa] refresh error body=%s", truncate(body, 1024))
+		return nil, newFxaAPIError(resp.StatusCode, []byte(body))
 	}
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
+		Debugf("[fxa] refresh reading response failed: %v", err)
 		return nil, fmt.Errorf("reading refresh response: %w", err)
 	}
 
 	var tok TokenResponse
 	if err := json.Unmarshal(data, &tok); err != nil {
+		Debugf("[fxa] refresh parsing response failed: %v bodyLen=%d", err, len(data))
 		return nil, fmt.Errorf("parsing refresh response: %w", err)
 	}
 	// Refresh response may not include a new refresh_token; keep the old one
@@ -419,7 +508,7 @@ func FetchProfileEmail(ctx context.Context, accessToken string) (string, error) 
 		return "", err
 	}
 	req.Header.Set("Authorization", "Bearer "+accessToken)
-	req.Header.Set("Accept", "application/json")
+	applyFxaHeaders(req)
 
 	resp, err := doControlPlane(req)
 	if err != nil {

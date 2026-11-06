@@ -119,6 +119,10 @@ func New(eng *engine.Engine, settings *store.Store, webFS fs.FS) *Server {
 		latency:  engine.NewLatencyCache(engine.DefaultLatencyTTL),
 	}
 	engine.SetLogSink(s.appendLog)
+	// Tell the user where to find the files to share when a sign-in or
+	// connection fails. The debug file is created lazily on the first
+	// sign-in attempt; this line makes the path visible before that.
+	engine.LogInfo("logs: app.log=%s signin-debug.log=%s", engine.LogFilePath(), vpnclient.DebugLogPath())
 
 	// If a previous run died while the tunnel owned the system proxy, put the
 	// user's settings back before anything else happens.
@@ -622,18 +626,29 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 90*time.Second)
 	defer cancel()
 
-	engine.LogInfo("signing in as %s", req.Email)
+	// Rich sign-in trail for the user to share: the high-level outcome goes
+	// to app.log via engine, every FxA/Fastly step goes to
+	// signin-debug.log via vpnclient.Debugf. Flush both at the end of the
+	// attempt so the files can be copied while the app is still running.
+	started := time.Now()
+	engine.LogInfo("sign-in start email=%s remote=%s userAgent=%q", req.Email, r.RemoteAddr, r.UserAgent())
+	vpnclient.Debugf("[api] login start email=%q passwordLen=%d fxaAuth=%s apiHost=%s guardian=%s", req.Email, len(req.Password), vpnclient.FxaAuthServerForDiagnostics(), vpnclient.FxaAPIHostForDiagnostics(), vpnclient.GuardianEndpointForDiagnostics())
 	login, err := vpnclient.FxaLogin(ctx, req.Email, req.Password)
+	elapsed := time.Since(started).Round(time.Millisecond)
 	if err != nil {
-		engine.LogWarn("sign-in failed: %v", err)
+		code, message := friendlyFxaError(err)
+		engine.LogWarn("sign-in failed in %s code=%q: %v", elapsed, code, err)
+		vpnclient.Debugf("[api] login failed in %s code=%q message=%q err=%v", elapsed, code, message, err)
 		// The status has to say the sign-in failed. A 200 with an error in
 		// the body reads as a success to the interface, which closed the
 		// sign-in sheet and showed nothing: the user never learned that
 		// their password was wrong.
-		code, message := friendlyFxaError(err)
+		engine.FlushLogFile()
+		vpnclient.FlushDebugLog()
 		writeJSON(w, http.StatusUnauthorized, loginResponse{Error: message, Code: code})
 		return
 	}
+	vpnclient.Debugf("[api] login FxA ok in %s verified=%v method=%q sessionTokenLen=%d", elapsed, login.Verified, login.VerificationMethod, len(login.SessionToken))
 
 	if !login.Verified {
 		s.mu.Lock()
@@ -641,6 +656,8 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		s.email = req.Email
 		s.mu.Unlock()
 		engine.LogInfo("account needs email confirmation (method=%s)", login.VerificationMethod)
+		vpnclient.Debugf("[api] login needs verification method=%q", login.VerificationMethod)
+		vpnclient.FlushDebugLog()
 		writeJSON(w, http.StatusOK, loginResponse{
 			NeedsVerification: true,
 			Method:            login.VerificationMethod,
@@ -650,13 +667,27 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := s.finishLogin(ctx, login.SessionToken, req.Email); err != nil {
-		engine.LogWarn("finishing the sign-in failed: %v", err)
+		engine.LogWarn("finishing the sign-in failed in %s: %v", time.Since(started).Round(time.Millisecond), err)
+		// The OAuth step can fail for the same reasons the login step
+		// can (anti-bot, network, expired session). Discarding the
+		// cause and always returning "generic" hid the real failure
+		// behind the same message for every user.
+		code, message := friendlyFxaError(err)
+		if code == "" {
+			code = "generic"
+		}
+		vpnclient.Debugf("[api] finishLogin failed code=%q message=%q err=%v", code, message, err)
+		engine.FlushLogFile()
+		vpnclient.FlushDebugLog()
 		writeJSON(w, http.StatusUnauthorized, loginResponse{
-			Error: "the sign-in could not be completed; try again",
-			Code:  "generic",
+			Error: message,
+			Code:  code,
 		})
 		return
 	}
+	engine.LogInfo("sign-in ok in %s", time.Since(started).Round(time.Millisecond))
+	engine.FlushLogFile()
+	vpnclient.FlushDebugLog()
 	writeJSON(w, http.StatusOK, loginResponse{OK: true})
 }
 
@@ -692,8 +723,13 @@ func (s *Server) handleVerify(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
 	defer cancel()
 
+	engine.LogInfo("verify start email=%s codeLen=%d sessionTokenLen=%d", email, len(code), len(sessionToken))
+	vpnclient.Debugf("[api] verify start email=%q codeLen=%d sessionTokenLen=%d", email, len(code), len(sessionToken))
 	if err := vpnclient.FxaVerifySession(ctx, sessionToken, code); err != nil {
 		engine.LogWarn("verification failed: %v", err)
+		vpnclient.Debugf("[api] verify failed err=%v", err)
+		engine.FlushLogFile()
+		vpnclient.FlushDebugLog()
 		writeJSON(w, http.StatusUnauthorized, loginResponse{
 			Error: "that code was not accepted; check the email and try again",
 			Code:  "wrong-code",
@@ -702,12 +738,22 @@ func (s *Server) handleVerify(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := s.finishLogin(ctx, sessionToken, email); err != nil {
 		engine.LogWarn("finishing the sign-in failed: %v", err)
+		code, message := friendlyFxaError(err)
+		if code == "" {
+			code = "generic"
+		}
+		vpnclient.Debugf("[api] verify finishLogin failed code=%q message=%q err=%v", code, message, err)
+		engine.FlushLogFile()
+		vpnclient.FlushDebugLog()
 		writeJSON(w, http.StatusUnauthorized, loginResponse{
-			Error: "the sign-in could not be completed; try again",
-			Code:  "generic",
+			Error: message,
+			Code:  code,
 		})
 		return
 	}
+	engine.LogInfo("verify ok email=%s", email)
+	engine.FlushLogFile()
+	vpnclient.FlushDebugLog()
 	writeJSON(w, http.StatusOK, loginResponse{OK: true})
 }
 
@@ -725,22 +771,37 @@ func (s *Server) handleVerifyContinue(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
 	defer cancel()
+	engine.LogInfo("verify-continue start email=%s sessionTokenLen=%d", email, len(sessionToken))
+	vpnclient.Debugf("[api] verifyContinue start email=%q sessionTokenLen=%d", email, len(sessionToken))
 	if err := s.finishLogin(ctx, sessionToken, email); err != nil {
 		engine.LogWarn("finishing the sign-in failed: %v", err)
+		code, message := friendlyFxaError(err)
+		if code == "" {
+			code = "generic"
+		}
+		vpnclient.Debugf("[api] verifyContinue finishLogin failed code=%q message=%q err=%v", code, message, err)
+		engine.FlushLogFile()
+		vpnclient.FlushDebugLog()
 		writeJSON(w, http.StatusUnauthorized, loginResponse{
-			Error: "the sign-in could not be completed; try again",
-			Code:  "generic",
+			Error: message,
+			Code:  code,
 		})
 		return
 	}
+	engine.LogInfo("verify-continue ok email=%s", email)
+	engine.FlushLogFile()
+	vpnclient.FlushDebugLog()
 	writeJSON(w, http.StatusOK, loginResponse{OK: true})
 }
 
 func (s *Server) finishLogin(ctx context.Context, sessionToken, email string) error {
+	vpnclient.Debugf("[api] finishLogin oauth start email=%q sessionTokenLen=%d", email, len(sessionToken))
 	token, err := vpnclient.FxaOAuthToken(ctx, sessionToken)
 	if err != nil {
+		vpnclient.Debugf("[api] finishLogin oauth failed err=%v", err)
 		return fmt.Errorf("obtaining access token: %w", err)
 	}
+	vpnclient.Debugf("[api] finishLogin oauth ok accessLen=%d refreshLen=%d expiresIn=%d scope=%q", len(token.AccessToken), len(token.RefreshToken), token.ExpiresIn, token.Scope)
 
 	acc := vpnclient.Account{Email: email, AddedAt: time.Now(), LastUsed: time.Now()}
 	vpnclient.ApplyToken(&acc, token)
@@ -957,11 +1018,19 @@ func friendlyFxaError(err error) (code, message string) {
 		return "invalid-credentials", "incorrect email or password"
 	case strings.Contains(msg, "errno 103"):
 		return "account-locked", "your account is locked after too many attempts; try again later"
-	case strings.Contains(msg, "errno 125"):
+	case strings.Contains(msg, "errno 114"), strings.Contains(msg, "errno 125"), strings.Contains(msg, "429"):
 		return "too-many-attempts", "too many sign-in attempts; wait a few minutes and try again"
 	case strings.Contains(msg, "errno 201"):
 		return "needs-confirmation", "the password is correct but the account needs email confirmation"
-	case strings.Contains(msg, "406"):
+	case strings.Contains(msg, "406"), strings.Contains(msg, "Fastly"), strings.Contains(msg, "anti-bot"), strings.Contains(msg, "challenge"):
+		// The edge answered HTTP 406 with an empty body, or the solver
+		// failed before the edge answered at all (missing init call,
+		// unsupported challenge type like captcha, cookie not accepted,
+		// post-back error). All of those are the same user-facing
+		// failure — the anti-bot check did not complete — but only the
+		// first carries "406" in the message, so checking for 406
+		// alone sent every other solver failure to the generic
+		// message.
 		return "anti-bot", "Firefox's anti-bot check could not be completed; try again"
 	case strings.Contains(msg, "errno 107"), strings.Contains(msg, "Invalid parameter in request body"):
 		// The address itself was refused before it was ever an account.
@@ -1713,7 +1782,17 @@ func (s *Server) handleDiagnostics(w http.ResponseWriter, r *http.Request) {
 	// still has the old server" is a real failure this report should show.
 	fmt.Fprintf(&b, "\nsystem proxy: %s\n", win.CurrentProxySummary())
 
-	fmt.Fprintf(&b, "\nlog (last %d lines):\n", diagnosticsLogLines)
+	// Log file locations, so a user who is asked to share logs knows
+	// which files to send. Both are under %APPDATA%\Todnet.
+	engine.FlushLogFile()
+	vpnclient.FlushDebugLog()
+	fmt.Fprintf(&b, "\nlogs: app.log=%s signin-debug.log=%s\n", engine.LogFilePath(), vpnclient.DebugLogPath())
+
+	// FxA endpoints actually in use. They are variables (test hook), and
+	// a report that omits them cannot be reproduced elsewhere.
+	fmt.Fprintf(&b, "fxa:        auth=%s apiHost=%s guardian=%s\n", vpnclient.FxaAuthServerForDiagnostics(), vpnclient.FxaAPIHostForDiagnostics(), vpnclient.GuardianEndpointForDiagnostics())
+
+	fmt.Fprintf(&b, "\nlog (last %d lines, in-memory):\n", diagnosticsLogLines)
 	logs := engine.RecentLogs()
 	start := 0
 	if len(logs) > diagnosticsLogLines {
@@ -1721,6 +1800,27 @@ func (s *Server) handleDiagnostics(w http.ResponseWriter, r *http.Request) {
 	}
 	for _, e := range logs[start:] {
 		fmt.Fprintf(&b, "%s %-5s %s\n", e.Time.Format("2006-01-02 15:04:05.000"), e.Level, e.Message)
+	}
+
+	// On-disk tails survive a restart, which the ring does not. A sign-in
+	// failure from before the last launch is only in these files.
+	fmt.Fprintf(&b, "\n--- app.log tail (last 256 KiB) ---\n")
+	if tail := engine.ReadLogFileTail(256 << 10); tail != "" {
+		fmt.Fprintf(&b, "%s", tail)
+		if !strings.HasSuffix(tail, "\n") {
+			fmt.Fprintf(&b, "\n")
+		}
+	} else {
+		fmt.Fprintf(&b, "(no app.log on disk)\n")
+	}
+	fmt.Fprintf(&b, "\n--- signin-debug.log tail (last 256 KiB) ---\n")
+	if tail := vpnclient.DebugLogTail(256 << 10); tail != "" {
+		fmt.Fprintf(&b, "%s", tail)
+		if !strings.HasSuffix(tail, "\n") {
+			fmt.Fprintf(&b, "\n")
+		}
+	} else {
+		fmt.Fprintf(&b, "(no signin-debug.log yet; try to sign in once, then copy diagnostics again)\n")
 	}
 
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")

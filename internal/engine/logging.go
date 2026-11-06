@@ -2,6 +2,7 @@ package engine
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"sync"
@@ -31,6 +32,7 @@ var (
 	logRing    []LogEntry
 	logVerbose bool
 	logFile    *os.File
+	logFilePath string
 )
 
 const logRingSize = 500
@@ -55,6 +57,7 @@ func EnableFileLogging(path string) error {
 	logMu.Lock()
 	prev := logFile
 	logFile = f
+	logFilePath = path
 	logMu.Unlock()
 	if prev != nil {
 		_ = prev.Close()
@@ -62,11 +65,87 @@ func EnableFileLogging(path string) error {
 	return nil
 }
 
+// LogFilePath returns the path of the on-disk log, or "" when file logging
+// is not enabled (for example in unit tests). Diagnostics include it so a
+// user who is asked to share logs knows which file to send.
+func LogFilePath() string {
+	logMu.RLock()
+	defer logMu.RUnlock()
+	return logFilePath
+}
+
+// FlushLogFile forces buffered log writes to disk. Log writes are issued as
+// write syscalls (no bufio), so this is mainly a sync for the share-while-
+// running case: the user copies app.log while the app is still open.
+func FlushLogFile() {
+	logMu.Lock()
+	f := logFile
+	logMu.Unlock()
+	if f != nil {
+		_ = f.Sync()
+	}
+}
+
+// ReadLogFileTail returns the last maxBytes of the on-disk log file, so the
+// diagnostics report can include history that survived a restart (the
+// in-memory ring is empty after one). It never returns an error for a
+// missing file; it returns "".
+func ReadLogFileTail(maxBytes int64) string {
+	path := LogFilePath()
+	if path == "" || maxBytes <= 0 {
+		return ""
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		return ""
+	}
+	defer f.Close()
+	st, err := f.Stat()
+	if err != nil || st.Size() == 0 {
+		return ""
+	}
+	offset := int64(0)
+	if st.Size() > maxBytes {
+		offset = st.Size() - maxBytes
+		// Advance to the next line boundary so the tail starts on a
+		// line. Only when there is still content after it, otherwise a
+		// short file would tail to empty.
+		if _, err := f.Seek(offset, 0); err != nil {
+			return ""
+		}
+		buf := make([]byte, 4096)
+		n, _ := f.Read(buf)
+		if idx := indexByte(buf[:n], '\n'); idx >= 0 {
+			if offset+int64(idx)+1 < st.Size() {
+				offset += int64(idx) + 1
+			}
+		}
+		if _, err := f.Seek(offset, 0); err != nil {
+			return ""
+		}
+	}
+	data, err := io.ReadAll(f)
+	if err != nil {
+		return ""
+	}
+	return string(data)
+}
+
+func indexByte(b []byte, c byte) int {
+	for i, v := range b {
+		if v == c {
+			return i
+		}
+	}
+	return -1
+}
+
 // CloseFileLogging flushes and closes the on-disk log.
 func CloseFileLogging() {
 	logMu.Lock()
 	f := logFile
 	logFile = nil
+	logFilePath = ""
 	logMu.Unlock()
 	if f != nil {
 		_ = f.Sync()

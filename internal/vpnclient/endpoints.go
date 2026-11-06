@@ -25,6 +25,13 @@ var (
 	remoteSettingsURL       = endpointFromEnv("TODNET_SERVERLIST_URL", "https://firefox.settings.services.mozilla.com/v1/buckets/main/collections/vpn-serverlist/records")
 )
 
+// FxaAuthServerForDiagnostics exposes the effective FxA endpoints for the
+// diagnostics report. They are variables (not constants) so tests can point
+// them at loopback; the report has to say which ones were actually used.
+func FxaAuthServerForDiagnostics() string    { return fxaAuthServer }
+func FxaAPIHostForDiagnostics() string       { return fxaAPIHost }
+func GuardianEndpointForDiagnostics() string { return GuardianEndpointDefault }
+
 func endpointFromEnv(name, fallback string) string {
 	raw := strings.TrimSpace(os.Getenv(name))
 	if raw == "" {

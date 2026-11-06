@@ -31,7 +31,14 @@ const (
 	// fst-post-back ({ch, tok} responses).
 	maxPostBackRounds = 3
 
-	fastlySolverUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
+	// FxA is a Firefox service, so the challenge solver and the FxA API
+	// present the same Firefox browser identity. The Fastly edge binds
+	// the solved cookie to the browser identity that earned it; a
+	// non-browser User-Agent on the API request (for example
+	// MozillaVPN/...) is rejected with HTTP 406 even with a valid
+	// cookie. This matches the upstream firefox-vpn-client default
+	// (Firefox 159).
+	fastlySolverUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0"
 )
 
 var (
@@ -87,6 +94,8 @@ type fastlyPostBackResponse struct {
 // as the subsequent API call: the issued cookie is bound to the exit IP that
 // solved the challenge.
 func solveFastlyChallenge(ctx context.Context) error {
+	Debugf("[fastly] solve start ua=%q", fastlySolverUserAgent)
+	started := time.Now()
 	challengeSolveMu.Lock()
 	defer challengeSolveMu.Unlock()
 
@@ -98,10 +107,13 @@ func solveFastlyChallenge(ctx context.Context) error {
 	// page at all and the cookie it needs is issued with Domain=firefox.com.
 	var lastErr error
 	for _, base := range []string{fxaAPIHost, strings.TrimRight(fxaSiteURL, "/")} {
+		Debugf("[fastly] solve host %s", base)
 		err := solveChallengeOnHost(ctx, base)
 		if err == nil {
+			Debugf("[fastly] solve ok host %s in %s", base, time.Since(started).Round(time.Millisecond))
 			return nil
 		}
+		Debugf("[fastly] solve host %s failed: %v", base, err)
 		lastErr = err
 		if errors.Is(err, errNoChallengePage) {
 			continue
@@ -110,6 +122,7 @@ func solveFastlyChallenge(ctx context.Context) error {
 	if lastErr == nil {
 		lastErr = errNoChallengePage
 	}
+	Debugf("[fastly] solve failed after %s: %v", time.Since(started).Round(time.Millisecond), lastErr)
 	return lastErr
 }
 
@@ -131,39 +144,54 @@ func solveChallengeOnHost(ctx context.Context, base string) error {
 
 	page, isChallenge, err := fetchChallengePage(ctx, client, pageURL)
 	if err != nil {
+		Debugf("[fastly] host %s page fetch failed: %v", base, err)
 		return err
 	}
+	Debugf("[fastly] host %s page len=%d isChallenge=%v", base, len(page), isChallenge)
 	if !isChallenge {
 		return errNoChallengePage
 	}
 
 	prefix := fastlyChallengePrefixRe.FindString(page)
 	if prefix == "" {
+		Debugf("[fastly] host %s challenge prefix not found pageLen=%d", base, len(page))
 		return fmt.Errorf("challenge asset prefix not found on %s", base)
 	}
+	Debugf("[fastly] host %s prefix=%q", base, prefix)
 
 	script, err := fetchText(ctx, client, base+prefix+"/script.js?reload=true")
 	if err != nil {
+		Debugf("[fastly] host %s script fetch failed: %v", base, err)
 		return fmt.Errorf("fetching challenge script: %w", err)
 	}
+	Debugf("[fastly] host %s script len=%d", base, len(script))
 
 	challenges, token, err := parseChallengeInit(script)
 	if err != nil {
+		Debugf("[fastly] host %s parse init failed: %v scriptLen=%d", base, err, len(script))
 		return err
+	}
+	Debugf("[fastly] host %s init challenges=%d tokenLen=%d", base, len(challenges), len(token))
+	for i, ch := range challenges {
+		Debugf("[fastly] host %s challenge[%d] ty=%q dataLen=%d", base, i, ch.Ty, len(ch.Data))
 	}
 
 	for round := 0; round < maxPostBackRounds; round++ {
+		Debugf("[fastly] host %s round %d/%d tokenLen=%d challenges=%d", base, round+1, maxPostBackRounds, len(token), len(challenges))
 		answers := make([]interface{}, 0, len(challenges))
 		for _, ch := range challenges {
 			answer, err := answerChallenge(ctx, client, base+prefix, token, ch)
 			if err != nil {
+				Debugf("[fastly] host %s round %d answer %q failed: %v", base, round+1, ch.Ty, err)
 				return err
 			}
+			Debugf("[fastly] host %s round %d answer %q ok", base, round+1, ch.Ty)
 			answers = append(answers, answer)
 		}
 
 		postBack, err := json.Marshal(fastlyPostBack{Token: token, Data: answers})
 		if err != nil {
+			Debugf("[fastly] host %s round %d marshal post-back failed: %v", base, round+1, err)
 			return err
 		}
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, base+prefix+"/fst-post-back", strings.NewReader(string(postBack)))
@@ -175,39 +203,54 @@ func solveChallengeOnHost(ctx context.Context, base string) error {
 		req.Header.Set("User-Agent", fastlySolverUserAgent)
 		req.Header.Set("Origin", baseOrigin(base+prefix))
 
+		Debugf("[fastly] host %s round %d post-back bodyLen=%d", base, round+1, len(postBack))
 		resp, err := client.Do(req)
 		if err != nil {
+			Debugf("[fastly] host %s round %d post-back transport failed: %v", base, round+1, err)
 			return fmt.Errorf("challenge post-back: %w", err)
 		}
 		data, readErr := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
 		resp.Body.Close()
 		if readErr != nil {
+			Debugf("[fastly] host %s round %d post-back read failed: %v", base, round+1, readErr)
 			return readErr
 		}
+		Debugf("[fastly] host %s round %d post-back -> %d bodyLen=%d %s", base, round+1, resp.StatusCode, len(data), SummarizeResponseHeaders(resp.Header))
 		if resp.StatusCode != http.StatusOK {
+			Debugf("[fastly] host %s round %d post-back body=%s", base, round+1, truncate(string(data), 512))
 			return fmt.Errorf("challenge post-back returned HTTP %d: %s", resp.StatusCode, truncate(string(data), 256))
 		}
 
 		var pbResp fastlyPostBackResponse
 		if err := json.Unmarshal(data, &pbResp); err != nil {
+			Debugf("[fastly] host %s round %d parse post-back failed: %v body=%s", base, round+1, err, truncate(string(data), 512))
 			return fmt.Errorf("parsing post-back response: %w", err)
 		}
+		Debugf("[fastly] host %s round %d post-back status=%q next=%d tokLen=%d", base, round+1, pbResp.Status, len(pbResp.Ch), len(pbResp.Tok))
 		if pbResp.Status == "success" {
 			// Probe before installing the cookie: with rotating-exit
 			// proxies the cookie may be bound to an IP the API call
 			// will not reuse, and the probe catches that immediately.
 			if _, stillChallenged, err := fetchChallengePage(ctx, client, pageURL); err != nil {
+				Debugf("[fastly] host %s post-success probe failed: %v", base, err)
 				return err
 			} else if stillChallenged {
+				Debugf("[fastly] host %s post-success probe still challenged (cookie not accepted)", base)
 				return errChallengeNotAccepted
 			}
+			Debugf("[fastly] host %s post-success probe ok, installing cookies", base)
 			return installChallengeCookies(jar, pageURL)
 		}
 		if len(pbResp.Ch) == 0 || pbResp.Tok == "" {
+			Debugf("[fastly] host %s round %d unexpected post-back body=%s", base, round+1, truncate(string(data), 512))
 			return fmt.Errorf("unexpected post-back response: %s", truncate(string(data), 256))
+		}
+		for i, ch := range pbResp.Ch {
+			Debugf("[fastly] host %s next challenge[%d] ty=%q dataLen=%d", base, i, ch.Ty, len(ch.Data))
 		}
 		challenges, token = pbResp.Ch, pbResp.Tok
 	}
+	Debugf("[fastly] host %s did not complete within %d rounds", base, maxPostBackRounds)
 	return fmt.Errorf("Fastly challenge did not complete within %d rounds", maxPostBackRounds)
 }
 
@@ -223,8 +266,14 @@ func fetchChallengePage(ctx context.Context, client *http.Client, pageURL string
 }
 
 func fetchText(ctx context.Context, client *http.Client, rawURL string) (string, error) {
+	host := rawURL
+	if u, err := url.Parse(rawURL); err == nil {
+		host = u.Host + u.Path
+	}
+	started := time.Now()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
 	if err != nil {
+		Debugf("[fastly] GET %s newRequest failed: %v", host, err)
 		return "", err
 	}
 	req.Header.Set("User-Agent", fastlySolverUserAgent)
@@ -232,13 +281,16 @@ func fetchText(ctx context.Context, client *http.Client, rawURL string) (string,
 
 	resp, err := client.Do(req)
 	if err != nil {
+		Debugf("[fastly] GET %s transport failed after %s: %v", host, time.Since(started).Round(time.Millisecond), err)
 		return "", err
 	}
 	data, err := io.ReadAll(io.LimitReader(resp.Body, 2<<20))
 	resp.Body.Close()
 	if err != nil {
+		Debugf("[fastly] GET %s read failed: %v", host, err)
 		return "", err
 	}
+	Debugf("[fastly] GET %s -> %d len=%d in %s %s", host, resp.StatusCode, len(data), time.Since(started).Round(time.Millisecond), SummarizeResponseHeaders(resp.Header))
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("GET %s returned HTTP %d", rawURL, resp.StatusCode)
 	}
@@ -275,8 +327,10 @@ func answerChallenge(ctx context.Context, client *http.Client, prefixURL, token 
 		}
 		answer, ok := solvePow(d.Base, d.Hash)
 		if !ok {
+			Debugf("[fastly] pow baseLen=%d hashLen=%d no solution", len(d.Base), len(d.Hash))
 			return nil, fmt.Errorf("no proof-of-work solution found for base %q", d.Base)
 		}
+		Debugf("[fastly] pow baseLen=%d answerLen=%d hmacLen=%d expires=%q", len(d.Base), len(answer), len(d.HMAC), d.Expires)
 		return map[string]interface{}{
 			"ty":      "pow",
 			"base":    d.Base,
@@ -335,21 +389,27 @@ func fetchPAT(ctx context.Context, client *http.Client, prefixURL, token string)
 	req.Header.Set("User-Agent", fastlySolverUserAgent)
 	req.Header.Set("Origin", baseOrigin(prefixURL))
 
+	Debugf("[fastly] PAT POST tokenLen=%d", len(token))
 	resp, err := client.Do(req)
 	if err != nil {
+		Debugf("[fastly] PAT transport failed: %v", err)
 		return "", fmt.Errorf("PAT request: %w", err)
 	}
 	data, err := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
 	resp.Body.Close()
 	if err != nil {
+		Debugf("[fastly] PAT read failed: %v", err)
 		return "", err
 	}
+	Debugf("[fastly] PAT -> %d len=%d %s", resp.StatusCode, len(data), SummarizeResponseHeaders(resp.Header))
 	if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusBadRequest {
 		// Aborted PAT (servers answer 401 or 400 depending on client
 		// fingerprint): empty auth triggers the PoW fallback server-side.
+		Debugf("[fastly] PAT aborted (status %d), empty auth", resp.StatusCode)
 		return "", nil
 	}
 	if resp.StatusCode != http.StatusOK {
+		Debugf("[fastly] PAT body=%s", truncate(string(data), 512))
 		return "", fmt.Errorf("PAT request returned HTTP %d: %s", resp.StatusCode, truncate(string(data), 256))
 	}
 
@@ -357,11 +417,14 @@ func fetchPAT(ctx context.Context, client *http.Client, prefixURL, token string)
 		Auth string `json:"auth"`
 	}
 	if err := json.Unmarshal(data, &out); err != nil {
+		Debugf("[fastly] PAT parse failed: %v bodyLen=%d", err, len(data))
 		return "", fmt.Errorf("parsing PAT response: %w", err)
 	}
 	if out.Auth == "" {
+		Debugf("[fastly] PAT empty auth bodyLen=%d", len(data))
 		return "", fmt.Errorf("empty PAT auth token")
 	}
+	Debugf("[fastly] PAT ok authLen=%d (value never logged)", len(out.Auth))
 	return out.Auth, nil
 }
 
@@ -389,6 +452,7 @@ func installChallengeCookies(solverJar http.CookieJar, pageURL string) error {
 		return err
 	}
 	cookies := solverJar.Cookies(parsed)
+	Debugf("[fastly] install solver %s", SummarizeCookies(cookies))
 	if len(cookies) == 0 {
 		return fmt.Errorf("challenge completed but no cookies were issued")
 	}
@@ -407,6 +471,7 @@ func installChallengeCookies(solverJar http.CookieJar, pageURL string) error {
 	controlPlaneHTTPClient.Jar.SetCookies(apiURL, cookies)
 	parsed2, _ := url.Parse(fxaSiteURL)
 	controlPlaneHTTPClient.Jar.SetCookies(parsed2, cookies)
+	Debugf("[fastly] install control jar api %s site %s", SummarizeCookies(controlPlaneHTTPClient.Jar.Cookies(apiURL)), SummarizeCookies(controlPlaneHTTPClient.Jar.Cookies(parsed2)))
 	return nil
 }
 
