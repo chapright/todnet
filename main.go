@@ -30,7 +30,7 @@ import (
 var webFS embed.FS
 
 // version is overridden at build time with -ldflags "-X main.version=...".
-var version = "1.0.0"
+var version = "1.0.1"
 
 // forceVerbose mirrors the -verbose flag so headless mode, which has no
 // settings object of its own yet, can enable per-connection logging too.
